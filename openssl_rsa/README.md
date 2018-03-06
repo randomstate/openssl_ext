@@ -1,6 +1,6 @@
 # openssl_rsa
 
-TODO: Write a description here
+RSA C Bindings for Crystal
 
 ## Installation
 
@@ -9,7 +9,7 @@ Add this to your application's `shard.yml`:
 ```yaml
 dependencies:
   openssl_rsa:
-    github: [your-github-name]/openssl_rsa
+    github: randomstate/openssl_rsa.cr
 ```
 
 ## Usage
@@ -18,20 +18,12 @@ dependencies:
 require "openssl_rsa"
 ```
 
-TODO: Write usage instructions here
+See `spec/rsa_spec.cr` for usage in depth.
+The bindings closely follows the API for https://ruby-doc.org/stdlib-2.4.0/libdoc/openssl/rdoc/OpenSSL/PKey/RSA.html
 
-## Development
+**Encoding with a passphrase is not yet supported as OpenSSL fails silently without any errors (in order to fix).**
 
-TODO: Write development instructions here
-
-## Contributing
-
-1. Fork it ( https://github.com/[your-github-name]/openssl_rsa/fork )
-2. Create your feature branch (git checkout -b my-new-feature)
-3. Commit your changes (git commit -am 'Add some feature')
-4. Push to the branch (git push origin my-new-feature)
-5. Create a new Pull Request
 
 ## Contributors
 
-- [[your-github-name]](https://github.com/[your-github-name]) Connor Imrie - creator, maintainer
+- [cimrie](https://github.com/cimrie) Connor Imrie - creator, maintainer
