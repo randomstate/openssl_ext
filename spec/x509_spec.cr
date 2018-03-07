@@ -1,7 +1,7 @@
 require "./spec_helper"
 
 require "spec"
-require "../src/openssl/x509/certificate"
+require "../src/openssl_ext/x509/certificate"
 
 include OpenSSL::X509
 

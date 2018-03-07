@@ -1,6 +1,6 @@
-# openssl_rsa
+# openssl_ext
 
-RSA C Bindings for Crystal
+RSA C Bindings for Crystal (and other extensions)
 
 ## Installation
 
@@ -8,7 +8,7 @@ Add this to your application's `shard.yml`:
 
 ```yaml
 dependencies:
-  openssl_rsa:
+  openssl_ext:
     github: randomstate/openssl_rsa.cr
 ```
 

@@ -1,7 +1,7 @@
 require "./spec_helper"
 
 require "spec"
-require "../src/openssl/rsa"
+require "../src/openssl_ext/rsa"
 
 describe OpenSSL::RSA do
   describe "instantiating and generate a key" do
