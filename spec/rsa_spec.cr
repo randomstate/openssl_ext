@@ -1,7 +1,7 @@
 require "./spec_helper"
 
 require "spec"
-require "../src/openssl_rsa/rsa"
+require "../src/openssl/rsa"
 
 describe OpenSSL::RSA do
   describe "instantiating and generate a key" do
@@ -124,6 +124,17 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
       decrypted = rsa.private_decrypt encrypted
 
       String.new(decrypted).should eq "hello world"
+    end
+    it "should be able to sign and verify data" do
+      rsa = OpenSSL::RSA.new(1024)
+      digest = OpenSSL::Digest.new("sha256")
+      data = "my test data"
+
+      signature = rsa.sign(digest, data)
+      new_digest = OpenSSL::Digest.new("sha256")
+
+      rsa.verify(new_digest, signature, data).should be_true
+      rsa.verify(new_digest, signature[0, 10], data).should be_false
     end
   end
   describe "can set parameters for more efficient decryption" do

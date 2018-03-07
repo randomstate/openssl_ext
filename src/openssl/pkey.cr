@@ -128,24 +128,34 @@ module OpenSSL
       }
     end
 
-    # def self.digest(algorithm : Symbol, key, data) : Bytes
-    #   evp = case algorithm
-    #         when :md4       then LibCrypto.evp_md4
-    #         when :md5       then LibCrypto.evp_md5
-    #         when :ripemd160 then LibCrypto.evp_ripemd160
-    #         when :sha1      then LibCrypto.evp_sha1
-    #         when :sha224    then LibCrypto.evp_sha224
-    #         when :sha256    then LibCrypto.evp_sha256
-    #         when :sha384    then LibCrypto.evp_sha384
-    #         when :sha512    then LibCrypto.evp_sha512
-    #         else                 raise "Unsupported digest algorithm: #{algorithm}"
-    #         end
-    #   key_slice = key.to_slice
-    #   data_slice = data.to_slice
-    #   buffer = Bytes.new(128)
-    #   LibCrypto.hmac(evp, key_slice, key_slice.size, data_slice, data_slice.size, buffer, out buffer_len)
-    #   buffer[0, buffer_len.to_i]
-    # end
+    def sign(digest, data)
+      unless private?
+        raise PKeyError.new "Private key is needed"
+      end
+
+      slice = Slice(UInt8).new(max_encrypt_size)
+      digest.update(data)
+
+      digest_pointer = digest.to_unsafe
+
+      raise PKeyError.new "Unable to sign" unless LibCrypto.evp_sign_final(digest, slice, out len, self)
+
+      slice[0, len.to_i32]
+    end
+
+    def verify(digest, signature, data)
+      signature = signature.to_slice
+      digest.update(data)
+
+      case LibCrypto.evp_verify_final(digest, signature, signature.size.to_u32, self)
+      when 0
+        false
+      when 1
+        true
+      else
+        raise PKeyError.new "Unable to verify"
+      end
+    end
 
     private def max_encrypt_size
       LibCrypto.evp_pkey_size(self)
