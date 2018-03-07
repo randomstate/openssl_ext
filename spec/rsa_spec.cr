@@ -65,6 +65,13 @@ kAK6rBib7m+r78eCRNPCh3nkW4mCE3R9z6QPBW//3FnTEqmTljK4Fa+uA59jpMOb
 1iEcbf2vwv7jrRx/CEu1VmOgsptVm1dcTABl/cL17Qp4tR7JUaW8FJYbf6WDyHl2
 7V/JgTownoEvqM38HpjZwF8kO1NckwSNdWCbDEpBbDR20cwMSWy79Q==
 -----END RSA PRIVATE KEY-----"
+      # pkey = OpenSSL::RSA.new(1024)
+      # cipher = OpenSSL::Cipher.new "des"
+      # cipher.random_key
+      # cipher.random_iv
+      # cipher.update("test")
+
+      # encrypted_pem = pkey.to_pem(cipher, "test")
 
       decoded = OpenSSL::RSA.new(encrypted_pem, "test")
 

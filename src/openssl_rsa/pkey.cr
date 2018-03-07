@@ -19,10 +19,10 @@ module OpenSSL
 
     def self.new(io : IO, passphrase = nil, is_private = true)
       begin
-        bio = RSA_BIO.new(io)
+        bio = GETS_BIO.new(io)
         new(LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase), is_private)
       rescue
-        bio = RSA_BIO.new(IO::Memory.new(Base64.decode(io.to_s)))
+        bio = GETS_BIO.new(IO::Memory.new(Base64.decode(io.to_s)))
         new(LibCrypto.d2i_private_key_bio(bio, nil), is_private)
       end
     end
@@ -127,6 +127,25 @@ module OpenSSL
         return len
       }
     end
+
+    # def self.digest(algorithm : Symbol, key, data) : Bytes
+    #   evp = case algorithm
+    #         when :md4       then LibCrypto.evp_md4
+    #         when :md5       then LibCrypto.evp_md5
+    #         when :ripemd160 then LibCrypto.evp_ripemd160
+    #         when :sha1      then LibCrypto.evp_sha1
+    #         when :sha224    then LibCrypto.evp_sha224
+    #         when :sha256    then LibCrypto.evp_sha256
+    #         when :sha384    then LibCrypto.evp_sha384
+    #         when :sha512    then LibCrypto.evp_sha512
+    #         else                 raise "Unsupported digest algorithm: #{algorithm}"
+    #         end
+    #   key_slice = key.to_slice
+    #   data_slice = data.to_slice
+    #   buffer = Bytes.new(128)
+    #   LibCrypto.hmac(evp, key_slice, key_slice.size, data_slice, data_slice.size, buffer, out buffer_len)
+    #   buffer[0, buffer_len.to_i]
+    # end
 
     private def max_encrypt_size
       LibCrypto.evp_pkey_size(self)

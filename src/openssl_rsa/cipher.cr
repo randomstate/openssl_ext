@@ -1,5 +1,5 @@
 require "random/secure"
-require "openssl"
+require "openssl/cipher"
 
 class OpenSSL::Cipher
   def to_unsafe

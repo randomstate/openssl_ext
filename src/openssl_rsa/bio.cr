@@ -1,5 +1,5 @@
-struct RSA_BIO
-  RSA_BIO = begin
+struct OpenSSL::GETS_BIO
+  GETS_BIO = begin
     crystal_bio = OpenSSL::BIO::CRYSTAL_BIO
     crystal_bio.bgets = LibCrypto::BioMethodGets.new do |bio, buffer, len|
       io = Box(IO).unbox(bio.value.ptr)
@@ -24,13 +24,12 @@ struct RSA_BIO
   @boxed_io : Void*
 
   def initialize(@io : IO)
-    @bio = LibCrypto.bio_new(pointerof(RSA_BIO))
+    @bio = LibCrypto.bio_new(pointerof(GETS_BIO))
 
     # We need to store a reference to the box because it's
     # stored in `@bio.value.ptr`, but that lives in C-land,
     # not in Crystal-land.
     @boxed_io = Box(IO).box(io)
-
     @bio.value.ptr = @boxed_io
   end
 

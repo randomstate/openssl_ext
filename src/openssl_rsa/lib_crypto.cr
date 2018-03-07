@@ -222,4 +222,9 @@ lib LibCrypto
   fun d2i_private_key_bio = d2i_PrivateKey_bio(bp : Bio*, a : EvpPKey**) : EvpPKey*
   fun i2d_private_key = i2d_PrivateKey(a : EvpPKey*, pp : UInt8**) : LibC::Int
   fun i2d_public_key = i2d_PublicKey(a : EvpPKey*, pp : UInt8**) : LibC::Int
+
+  # Adding x509 Capabilities
+  fun pem_read_bio_x509 = PEM_read_bio_X509(bp : Bio*, x : X509**, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : X509
+  fun pem_write_bio_x509 = PEM_write_bio_X509(bp : Bio*, x : X509*) : LibC::Int
+  fun x509_get_public_key = X509_get_pubkey(x : X509) : EvpPKey*
 end

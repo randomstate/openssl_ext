@@ -72,6 +72,7 @@ module OpenSSL
       unless private?
         raise RsaError.new "private key needed"
       end
+
       from = data.to_slice
       to = Slice(UInt8).new max_encrypt_size
       len = LibCrypto.rsa_private_decrypt(from.size, from, to, rsa, padding)
