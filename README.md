@@ -9,16 +9,16 @@ Add this to your application's `shard.yml`:
 ```yaml
 dependencies:
   openssl_ext:
-    github: randomstate/openssl_rsa.cr
+    github: randomstate/openssl_ext
 ```
 
 ## Usage
 
 ```crystal
-require "openssl_rsa"
+require "openssl_ext"
 ```
 
-See `spec/rsa_spec.cr` for usage in depth.
+See `spec/rsa_spec.cr` and `spec/x509_spec.cr` for usage in depth.
 The bindings closely follows the API for https://ruby-doc.org/stdlib-2.4.0/libdoc/openssl/rdoc/OpenSSL/PKey/RSA.html
 
 **Encoding with a passphrase is not yet supported as OpenSSL fails silently without any errors (in order to fix).**
