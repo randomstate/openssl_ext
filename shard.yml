@@ -1,0 +1,9 @@
+name: openssl_ext
+version: 0.1.0
+
+authors:
+  - Connor Imrie <3436576+CImrie@users.noreply.github.com>
+
+crystal: 0.24.1
+
+license: MIT
