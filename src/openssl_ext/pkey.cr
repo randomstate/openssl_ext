@@ -18,12 +18,17 @@ module OpenSSL
     end
 
     def self.new(io : IO, passphrase = nil, is_private = true)
-      begin
+      if is_private
+        begin
+          bio = GETS_BIO.new(io)
+          new(LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase), is_private)
+        rescue
+          bio = GETS_BIO.new(IO::Memory.new(Base64.decode(io.to_s)))
+          new(LibCrypto.d2i_private_key_bio(bio, nil), is_private)
+        end
+      else
         bio = GETS_BIO.new(io)
-        new(LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase), is_private)
-      rescue
-        bio = GETS_BIO.new(IO::Memory.new(Base64.decode(io.to_s)))
-        new(LibCrypto.d2i_private_key_bio(bio, nil), is_private)
+        new(LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase), is_private)
       end
     end
 
