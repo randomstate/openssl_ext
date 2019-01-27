@@ -16,7 +16,8 @@ struct OpenSSL::GETS_BIO
       io.seek(position)
       bytes = io.read(Slice.new(buffer, line.bytesize)).to_i
 
-      bytes - 1
+      bytes -= 1 unless bytes == 1
+      bytes
     end
     {% if compare_versions(LibCrypto::OPENSSL_VERSION, "1.1.0") >= 0 %}
       LibCrypto.BIO_meth_set_gets(crystal_bio, bgets)
