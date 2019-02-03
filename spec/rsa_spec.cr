@@ -6,14 +6,14 @@ require "../src/openssl_ext/rsa"
 describe OpenSSL::RSA do
   describe "instantiating and generate a key" do
     it "can instantiate and generate for a given key size" do
-      pkey = OpenSSL::RSA.new(256)
+      pkey = OpenSSL::RSA.new(512)
       pkey.private?.should be_true
       pkey.public?.should be_false
 
       pkey.public_key.public?.should be_true
     end
     it "can export to PEM format" do
-      pkey = OpenSSL::RSA.new(256)
+      pkey = OpenSSL::RSA.new(512)
       pkey.private?.should be_true
 
       pem = pkey.to_pem
@@ -23,7 +23,7 @@ describe OpenSSL::RSA do
       isEmpty.should be_false
     end
     it "can export to DER format" do
-      pkey = OpenSSL::RSA.new(256)
+      pkey = OpenSSL::RSA.new(512)
       pkey.private?.should be_true
       pem = pkey.to_pem
       der = pkey.to_der
@@ -97,13 +97,13 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
   end
   describe "RSA-blinding" do
     it "can turn blinding on" do
-      rsa = OpenSSL::RSA.new(128)
+      rsa = OpenSSL::RSA.new(512)
       rsa.blinding_on!
 
       rsa.blinding_on?.should be_true
     end
     it "can turn blinding off" do
-      rsa = OpenSSL::RSA.new(128)
+      rsa = OpenSSL::RSA.new(512)
       rsa.blinding_on!
       rsa.blinding_off!
 
@@ -112,14 +112,14 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
   end
   describe "encrypting / decrypting" do
     it "can encrypt a string using its private key and decrypt with public key" do
-      rsa = OpenSSL::RSA.new(256)
+      rsa = OpenSSL::RSA.new(512)
       encrypted = rsa.private_encrypt "hello world"
       decrypted = rsa.public_decrypt encrypted
 
       String.new(decrypted).should eq "hello world"
     end
     it "can encrypt a string using its public key and decrypt with private key" do
-      rsa = OpenSSL::RSA.new(256)
+      rsa = OpenSSL::RSA.new(512)
       encrypted = rsa.public_encrypt "hello world"
       decrypted = rsa.private_decrypt encrypted
 
