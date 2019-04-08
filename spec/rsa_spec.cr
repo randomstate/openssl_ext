@@ -137,6 +137,22 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
       rsa.verify(new_digest, signature[0, 10], data).should be_false
     end
   end
+
+  describe "can get parameters for serialization into other formats" do
+    it "can get p and q" do
+      rsa = OpenSSL::RSA.new(1024)
+      rsa.p
+      rsa.q
+    end
+
+    it "can get n, e and d" do
+      rsa = OpenSSL::RSA.new(1024)
+      rsa.n
+      rsa.e
+      rsa.d
+    end
+  end
+
   describe "can set parameters for more efficient decryption" do
     it "can set dmp1, dmq1, iqmp" do
     end
