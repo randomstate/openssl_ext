@@ -196,6 +196,8 @@ lib LibCrypto
 
   fun bignum_new = BN_new : Bignum*
   fun set_bignum_from_decimal = BN_dec2bn(a : Bignum**, str : LibC::Char*) : LibC::Int
+  fun bignum_to_bytes = BN_bn2bin(a : Bignum*, str : LibC::Char*) : LibC::Int
+  fun bignum_bits = BN_num_bits(a : Bignum*) : LibC::Int
 
   fun evp_pkey_new = EVP_PKEY_new : EvpPKey*
   fun evp_pkey_free = EVP_PKEY_free(pkey : EvpPKey*)
@@ -212,7 +214,9 @@ lib LibCrypto
   fun rsa_public_encrypt = RSA_public_encrypt(flen : LibC::Int, from : UInt8*, to : UInt8*, rsa : Rsa*, padding : LibC::Int) : LibC::Int
   fun rsa_private_decrypt = RSA_private_decrypt(flen : LibC::Int, from : UInt8*, to : UInt8*, rsa : Rsa*, padding : LibC::Int) : LibC::Int
   fun rsa_public_decrypt = RSA_public_decrypt(flen : LibC::Int, from : UInt8*, to : UInt8*, rsa : Rsa*, padding : LibC::Int) : LibC::Int
-
+  {% for param in %i[n e d p q] %}
+    fun rsa_get_{{param.id}} = RSA_get0_{{param.id}}(rsa : Rsa*) : Bignum*
+  {% end %}
   fun pem_read_bio_private_key = PEM_read_bio_PrivateKey(bp : Bio*, x : EvpPKey**, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : EvpPKey*
   fun pem_read_bio_public_key = PEM_read_bio_PUBKEY(bp : Bio*, x : EvpPKey**, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : EvpPKey*
   fun pem_write_bio_rsa_private_key = PEM_write_bio_RSAPrivateKey(bp : Bio*, x : Rsa*, enc : EVP_MD*, kstr : UInt8*, klen : LibC::Int, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : LibC::Int
