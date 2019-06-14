@@ -94,14 +94,5 @@ module OpenSSL
       LibCrypto.rsa_blinding_off(rsa)
       @blinding_on = false
     end
-
-    {% for param in %i[n e d p q] %}
-      def {{param.id}}
-        bignum = LibCrypto.rsa_get_{{param.id}}(rsa)
-        Bytes.new((LibCrypto.bignum_bits(bignum) + 7) / 8).tap do |bytes|
-          LibCrypto.bignum_to_bytes(bignum, bytes)
-        end
-      end
-    {% end %}
   end
 end
