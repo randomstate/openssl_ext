@@ -14,6 +14,7 @@ module OpenSSL
     end
 
     def self.new(encoded : String, passphrase = nil, is_private = true)
+      is_private = false if encoded.includes?("PUBLIC KEY-----")
       self.new(IO::Memory.new(encoded), passphrase, is_private)
     end
 
