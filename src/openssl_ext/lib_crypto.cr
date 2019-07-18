@@ -297,8 +297,8 @@ lib LibCrypto
   # Adding x509 Capabilities
   fun x509_name_print_ex = X509_NAME_print_ex(bio : Bio*, name : X509_NAME, indent : Int32, flags : LibC::ULong) : LibC::Int
   fun x509_gmtime_adj = X509_gmtime_adj(t : ASN1_TIME, adj : Int64) : ASN1_TIME
-  fun pem_read_bio_x509 = PEM_read_bio_X509(bp : Bio*, x : X509**, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : X509
-  fun pem_write_bio_x509 = PEM_write_bio_X509(bp : Bio*, x : X509*) : LibC::Int
+  fun pem_read_bio_x509 = PEM_read_bio_X509(bp : Bio*, x : X509, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : X509
+  fun pem_write_bio_x509 = PEM_write_bio_X509(bp : Bio*, x : X509) : LibC::Int
   fun x509_get_public_key = X509_get_pubkey(x : X509) : EvpPKey*
   fun evp_sign_final = EVP_SignFinal(ctx : EVP_MD_CTX, md : UInt8*, s : LibC::UInt*, pkey : EvpPKey*) : LibC::Int
   fun evp_verify_final = EVP_VerifyFinal(ctx : EVP_MD_CTX, sigbuf : UInt8*, siglen : LibC::UInt, pkey : EvpPKey*) : LibC::Int
