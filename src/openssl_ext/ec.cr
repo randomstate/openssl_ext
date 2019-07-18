@@ -98,7 +98,7 @@ module OpenSSL
       slice = Slice(UInt8).new(len)
       p = slice.to_unsafe
       len = fn.call(pointerof(p))
-      
+
       output = slice[0, len]
       io.write(output)
     end

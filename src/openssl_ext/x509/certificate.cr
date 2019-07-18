@@ -11,6 +11,15 @@ module OpenSSL::X509
       new x509
     end
 
+    def self.from_pem(io)
+      bio = OpenSSL::GETS_BIO.new(io)
+      x509 = LibCrypto.pem_read_bio_x509(bio, nil, nil, nil)
+
+      raise CertificateError.new "Could not read certificate from the PEM file" unless x509
+
+      new(x509)
+    end
+
     def to_pem(io)
       bio = OpenSSL::GETS_BIO.new(io)
       cert_pointer = self.to_unsafe_pointer

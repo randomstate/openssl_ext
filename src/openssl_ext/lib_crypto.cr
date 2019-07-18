@@ -295,6 +295,7 @@ lib LibCrypto
   fun pem_write_bio_ec_pubkey = PEM_write_bio_EC_PUBKEY(bio : Bio*, key : EcKey) : Int32
 
   # Adding x509 Capabilities
+  fun x509_name_print_ex = X509_NAME_print_ex(bio : Bio*, name : X509_NAME, indent : Int32, flags : LibC::ULong) : LibC::Int
   fun x509_gmtime_adj = X509_gmtime_adj(t : ASN1_TIME, adj : Int64) : ASN1_TIME
   fun pem_read_bio_x509 = PEM_read_bio_X509(bp : Bio*, x : X509**, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : X509
   fun pem_write_bio_x509 = PEM_write_bio_X509(bp : Bio*, x : X509*) : LibC::Int
