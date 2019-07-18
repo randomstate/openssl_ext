@@ -9,7 +9,7 @@ module OpenSSL
       raise PKeyError.new "Invalid EVP_PKEY" unless @pkey
     end
 
-    def initialize(is_private)
+    def initialize(is_private : Bool)
       initialize(LibCrypto.evp_pkey_new, is_private)
     end
 
@@ -127,7 +127,7 @@ module OpenSSL
           len = key_size
         end
 
-        buffer.copy_from(pwd.to_slice.pointer(len), len)
+        buffer.copy_from(pwd.to_slice.to_unsafe, len)
 
         return len
       }

@@ -1,3 +1,5 @@
+require "openssl"
+
 lib LibCrypto
   struct EvpPKey
     type : LibC::Int
@@ -189,19 +191,52 @@ lib LibCrypto
     PKCS1_PSS_PADDING  = 6
   end
 
+  BIO_CTRL_RESET = 1
+
+  NID_rsaEncryption        =   6
+  NID_dsa                  = 116
+  NID_X9_62_id_ecPublicKey = 408
+
+  EVP_PKEY_NONE = NID_undef
+  EVP_PKEY_RSA  = NID_rsaEncryption
+  EVP_PKEY_DSA  = NID_dsa
+  EVP_PKEY_EC   = NID_X9_62_id_ecPublicKey
+
+  alias PasswordCallback = (LibC::Char*, LibC::Int, LibC::Int, Void*) -> LibC::Int
+
   type EVP_PKEY_ASN1_method = Void*
   type Engine = Void*
   type BnCtx = Void*
   type BnBlinding = Void*
 
+  alias ASN1_TIME = Void*
+
+  fun obj_txt2nid = OBJ_txt2nid(s : UInt8*) : Int32
+  fun asn1_dup = ASN1_dup(i2d : Void*, d2i_of_void : Void*, x : Void*) : Void*
+  fun asn1_time_free = ASN1_TIME_free(t : ASN1_TIME)
+
   fun bignum_new = BN_new : Bignum*
   fun set_bignum_from_decimal = BN_dec2bn(a : Bignum**, str : LibC::Char*) : LibC::Int
+
+  fun bio_s_mem = BIO_s_mem : BioMethod*
+  fun bio_new = BIO_new(type : BioMethod*) : Bio*
+  fun bio_free = BIO_free(bio : Bio*) : LibC::Int
+  fun bio_free_all = BIO_free_all(bio : Bio*)
+  fun bio_read = BIO_read(bio : Bio*, data : LibC::Char*, len : LibC::Int) : LibC::Int
+  fun bio_write = BIO_write(bio : Bio*, data : LibC::Char*, len : LibC::Int) : LibC::Int
+  fun bio_set_data = BIO_set_data(bio : Bio*, data : Void*)
+  fun bio_get_data = BIO_get_data(bio : Bio*) : Void*
+  fun bio_set_init = BIO_set_init(bio : Bio*, init : LibC::Int)
+  fun bio_set_shutdown = BIO_set_shutdown(bio : Bio*, shut : LibC::Int)
+  fun bio_ctrl = BIO_ctrl(bio : Bio*, cmd : LibC::Int, larg : LibC::Long, parg : Void*) : LibC::Long
 
   fun evp_pkey_new = EVP_PKEY_new : EvpPKey*
   fun evp_pkey_free = EVP_PKEY_free(pkey : EvpPKey*)
   fun evp_pkey_size = EVP_PKEY_size(pkey : EvpPKey*) : LibC::Int
+  fun evp_pkey_bits = EVP_PKEY_bits(pkey : EvpPKey*) : LibC::Int
   fun evp_pkey_get1_rsa = EVP_PKEY_get1_RSA(pkey : EvpPKey*) : Rsa*
   fun evp_pkey_set1_rsa = EVP_PKEY_set1_RSA(pkey : EvpPKey*, key : Rsa*) : LibC::Int
+  fun evp_pkey_assign = EVP_PKEY_assign(pkey : EvpPKey*, type : LibC::Int, key : Void*) : LibC::Int
 
   fun rsa_new = RSA_new : Rsa*
   fun rsa_public_key_dup = RSAPublicKey_dup(rsa : Rsa*) : Rsa*
@@ -224,7 +259,43 @@ lib LibCrypto
   fun i2d_private_key = i2d_PrivateKey(a : EvpPKey*, pp : UInt8**) : LibC::Int
   fun i2d_public_key = i2d_PublicKey(a : EvpPKey*, pp : UInt8**) : LibC::Int
 
+  OPENSSL_EC_EXPLICIT_CURVE = 0x000
+  OPENSSL_EC_NAMED_CURVE    = 0x001
+
+  alias EcKey = Void*
+  alias EC_GROUP = Void*
+
+  fun ec_key_new = EC_KEY_new : EcKey
+  fun ec_key_free = EC_KEY_free(key : EcKey)
+  fun ec_key_generate_key = EC_KEY_generate_key(key : EcKey) : Int32
+  fun ec_key_new_by_curve_name = EC_KEY_new_by_curve_name(nid : Int32) : EcKey
+  fun ec_key_print = EC_KEY_print(bio : Bio*, key : EcKey, off : Int32) : Int32
+  fun ec_key_set_asn1_flag = EC_KEY_set_asn1_flag(eckey : EcKey, asn1_flag : Int32)
+  fun ec_key_get0_group = EC_KEY_get0_group(key : EcKey) : EC_GROUP
+  fun ec_key_set_group = EC_KEY_set_group(key : EcKey, group : EC_GROUP) : Int32
+  fun ec_curve_nist2nid = EC_curve_nist2nid(s : UInt8*) : LibC::Int
+  fun evp_pkey_get1_ec_key = EVP_PKEY_get1_EC_KEY(pkey : EvpPKey*) : EcKey
+  fun i2d_ecprivatekey = i2d_ECPrivateKey(key : EcKey, out : UInt8**) : Int32
+  fun i2d_ec_pubkey = i2d_EC_PUBKEY(key : EcKey, out : UInt8**) : Int32
+  fun d2i_ecprivatekey = d2i_ECPrivateKey(key : EcKey*, out : UInt8**, length : Int64) : EcKey
+  fun d2i_ec_pubkey = d2i_EC_PUBKEY(key : EcKey*, out : UInt8**, length : Int64) : EcKey
+  fun i2d_ecprivatekey_bio = i2d_ECPrivateKey_bio(bio : Bio*, key : EcKey) : Int32
+  fun i2d_ec_pubkey_bio = i2d_EC_PUBKEY_bio(bio : Bio*, key : EcKey) : Int32
+  fun d2i_ecprivatekey_bio = d2i_ECPrivateKey_bio(bio : Bio*, key : EcKey*) : EcKey
+  fun d2i_ec_pubkey_bio = d2i_EC_PUBKEY_bio(bio : Bio*, key : EcKey*) : EcKey
+  fun ecdsa_size = ECDSA_size(eckey : EcKey) : Int32
+  fun ecdsa_sign = ECDSA_sign(type : Int32, dgst : UInt8*, dgstlen : Int32, sig : UInt8*, siglen : UInt32*, eckey : EcKey) : Int32
+  fun ecdsa_verify = ECDSA_verify(type : Int32, dgst : UInt8*, dgstlen : Int32, sig : UInt8*, siglen : UInt32, eckey : EcKey) : Int32
+  fun ec_group_get_curve_name = EC_GROUP_get_curve_name(group : EC_GROUP) : Int32
+  fun ec_group_set_asn1_flag = EC_GROUP_set_asn1_flag(group : EC_GROUP, flag : Int32)
+  fun pem_read_bio_ecprivatekey = PEM_read_bio_ECPrivateKey(bio : Bio*, key : EcKey*, cb : PasswordCallback, user_data : Void*) : EcKey
+  fun pem_write_bio_ecprivatekey = PEM_write_bio_ECPrivateKey(bio : Bio*, key : EcKey, enc : EVP_CIPHER*,
+                                                              kstr : UInt8*, klen : Int32, cb : PasswordCallback, user_data : Void*) : Int32
+  fun pem_read_bio_ec_pubkey = PEM_read_bio_EC_PUBKEY(bio : Bio*, key : EcKey*, cb : PasswordCallback, user_data : Void*) : EcKey
+  fun pem_write_bio_ec_pubkey = PEM_write_bio_EC_PUBKEY(bio : Bio*, key : EcKey) : Int32
+
   # Adding x509 Capabilities
+  fun x509_gmtime_adj = X509_gmtime_adj(t : ASN1_TIME, adj : Int64) : ASN1_TIME
   fun pem_read_bio_x509 = PEM_read_bio_X509(bp : Bio*, x : X509**, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : X509
   fun pem_write_bio_x509 = PEM_write_bio_X509(bp : Bio*, x : X509*) : LibC::Int
   fun x509_get_public_key = X509_get_pubkey(x : X509) : EvpPKey*
