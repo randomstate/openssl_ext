@@ -22,8 +22,7 @@ module OpenSSL::X509
 
     def to_pem(io)
       bio = OpenSSL::GETS_BIO.new(io)
-      cert_pointer = self.to_unsafe_pointer
-      raise CertificateError.new "Could not convert to PEM" unless LibCrypto.pem_write_bio_x509(bio, cert_pointer)
+      raise CertificateError.new "Could not convert to PEM" unless LibCrypto.pem_write_bio_x509(bio, self)
     end
 
     def to_pem
