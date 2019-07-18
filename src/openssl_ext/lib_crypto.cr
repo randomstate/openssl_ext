@@ -218,6 +218,7 @@ lib LibCrypto
   fun obj_txt2nid = OBJ_txt2nid(s : UInt8*) : Int32
   fun asn1_dup = ASN1_dup(i2d : Void*, d2i_of_void : Void*, x : Void*) : Void*
   fun asn1_time_free = ASN1_TIME_free(t : ASN1_TIME)
+  fun asn1_integer_set = ASN1_INTEGER_set(a : ASN1_INTEGER, v : Int64) : Int32
 
   fun bignum_new = BN_new : Bignum*
   fun set_bignum_from_decimal = BN_dec2bn(a : Bignum**, str : LibC::Char*) : LibC::Int
