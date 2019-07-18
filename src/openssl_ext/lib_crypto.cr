@@ -315,7 +315,7 @@ lib LibCrypto
   fun x509_get_subject_name = X509_get_subject_name(x509 : X509) : X509_NAME
   fun x509_get_serialnumber = X509_get_serialNumber(x509 : X509) : ASN1_INTEGER
   fun x509_set_version = X509_set_version(x509 : X509, version : Int64) : Int32
-  fun x509_set_pubic_key = X509_set_pubkey(x509 : X509, pkey : EvpPKey*) : Int32
+  fun x509_set_public_key = X509_set_pubkey(x509 : X509, pkey : EvpPKey*) : Int32
   fun x509_set_notbefore = X509_set1_notBefore(x509 : X509, tm : ASN1_TIME) : Int32
   fun x509_set_notafter = X509_set1_notAfter(x509 : X509, tm : ASN1_TIME) : Int32
   fun x509_set_issuer_name = X509_set_issuer_name(x509 : X509, name : X509_NAME) : Int32
