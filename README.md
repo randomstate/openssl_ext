@@ -1,6 +1,6 @@
 # openssl_ext
 
-RSA C Bindings for Crystal (and other extensions)
+OpenSSL C Bindings for Crystal (and other extensions)
 
 ## Installation
 
@@ -10,6 +10,7 @@ Add this to your application's `shard.yml`:
 dependencies:
   openssl_ext:
     github: crystal-extras/openssl_ext
+    branch: master
 ```
 
 ## Usage
