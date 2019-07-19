@@ -15,11 +15,11 @@ module OpenSSL::X509
     end
 
     def subject_certificate=(cert : Certificate)
-      @ctx.subject_cert = cert
+      @ctx.subject_cert = cert.as Void*
     end
 
     def issuer_certificate=(cert : Certificate)
-      @ctx.issuer_cert = cert
+      @ctx.issuer_cert = cert.as Void*
     end
 
     def finalize
