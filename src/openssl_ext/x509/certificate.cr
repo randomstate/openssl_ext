@@ -59,7 +59,7 @@ module OpenSSL::X509
     end
 
     def public_key=(pkey)
-      LibCrypto.x509_set_pubkey(self, pkey)
+      LibCrypto.x509_set_public_key(self, pkey)
     end
 
     def not_before=(time : ASN1::Time)
