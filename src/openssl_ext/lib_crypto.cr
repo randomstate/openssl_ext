@@ -215,10 +215,13 @@ lib LibCrypto
   alias ASN1_INTEGER = Void*
   alias ASN1_TIME = Void*
 
-  fun obj_txt2nid = OBJ_txt2nid(s : UInt8*) : Int32
+  fun openssl_free = OPENSSL_free(addr : Void*)
+
+  fun obj_txt2nid = OBJ_txt2nid(s : UInt8*) : LibC::Int
   fun asn1_dup = ASN1_dup(i2d : Void*, d2i_of_void : Void*, x : Void*) : Void*
   fun asn1_time_free = ASN1_TIME_free(t : ASN1_TIME)
-  fun asn1_integer_set = ASN1_INTEGER_set(a : ASN1_INTEGER, v : Int64) : Int32
+  fun asn1_integer_get = ASN1_INTEGER_get(a : ASN1_INTEGER) : LibC::Long
+  fun asn1_integer_set = ASN1_INTEGER_set(a : ASN1_INTEGER, v : LibC::Long) : LibC::Int
 
   fun bignum_new = BN_new : Bignum*
   fun set_bignum_from_decimal = BN_dec2bn(a : Bignum**, str : LibC::Char*) : LibC::Int
@@ -311,9 +314,11 @@ lib LibCrypto
   fun evp_verify_final = EVP_VerifyFinal(ctx : EVP_MD_CTX, sigbuf : UInt8*, siglen : LibC::UInt, pkey : EvpPKey*) : LibC::Int
 
   fun x509_digest = X509_digest(x509 : X509, type : EVP_MD, md : UInt8*, len : UInt32*) : Int32
+  fun x509_get_issuer_name = X509_get_issuer_name(x509 : X509) : X509_NAME
   fun x509_get_public_key = X509_get_pubkey(x509 : X509) : EvpPKey*
   fun x509_get_subject_name = X509_get_subject_name(x509 : X509) : X509_NAME
   fun x509_get_serialnumber = X509_get_serialNumber(x509 : X509) : ASN1_INTEGER
+  fun x509_get_version = X509_get_version(x509 : X509) : Int64
   fun x509_set_version = X509_set_version(x509 : X509, version : Int64) : Int32
   fun x509_set_public_key = X509_set_pubkey(x509 : X509, pkey : EvpPKey*) : Int32
   fun x509_set_notbefore = X509_set1_notBefore(x509 : X509, tm : ASN1_TIME) : Int32
