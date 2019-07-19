@@ -67,7 +67,7 @@ module OpenSSL::X509
     end
 
     def not_after=(time : ASN1::Time)
-      LibCrypto.x509_set_notafter(time)
+      LibCrypto.x509_set_notafter(self, time)
     end
 
     def sign(pkey : LibCrypto::EvpPKey*, digest : LibCrypto::EVP_MD_CTX)
