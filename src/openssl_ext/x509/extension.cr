@@ -1,6 +1,6 @@
 module OpenSSL::X509
   class Extension
-    def self.new(ctx : LibCrypto::X509V3_CTX*, oid : String, value : String, critical = false)
+    def self.new(ctx : ExtensionFactory, oid : String, value : String, critical = false)
       raise Error.new("Invalid X509V3_CTX") if ctx.null?
 
       nid = LibCrypto.obj_ln2nid(oid)
@@ -10,7 +10,7 @@ module OpenSSL::X509
       new(ctx, nid, value, critical)
     end
 
-    def initialize(ctx : LibCrypto::X509V3_CTX*, nid : Int32, value : String, critical = false)
+    def initialize(ctx : ExtensionFactory, nid : Int32, value : String, critical = false)
       valstr = String.build do |str|
         str << "critical," if critical
         str << value
