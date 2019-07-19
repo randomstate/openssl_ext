@@ -1,7 +1,7 @@
 module OpenSSL::X509
   class Extension
     def self.new(ctx : ExtensionFactory, oid : String, value : String, critical = false)
-      raise Error.new("Invalid X509V3_CTX") if ctx.null?
+      raise Error.new("Invalid X509V3_CTX") unless ctx
 
       nid = LibCrypto.obj_ln2nid(oid)
       nid = LibCrypto.obj_sn2nid(oid) if nid == LibCrypto::NID_undef

@@ -215,8 +215,6 @@ lib LibCrypto
   alias ASN1_INTEGER = Void*
   alias ASN1_TIME = Void*
 
-  fun openssl_free = OPENSSL_free(addr : Void*)
-
   fun obj_txt2nid = OBJ_txt2nid(s : UInt8*) : LibC::Int
   fun asn1_dup = ASN1_dup(i2d : Void*, d2i_of_void : Void*, x : Void*) : Void*
   fun asn1_time_free = ASN1_TIME_free(t : ASN1_TIME)

@@ -70,8 +70,8 @@ module OpenSSL::X509
       LibCrypto.x509_set_notafter(self, time)
     end
 
-    def sign(pkey : LibCrypto::EvpPKey*, digest : LibCrypto::EVP_MD_CTX)
-      if LibCrypto.x509_sign(self, pkey, digest.to_unsafe_md) == 0
+    def sign(pkey : OpenSSL::PKey, digest : Digest)
+      if LibCrypto.x509_sign(self, pkey.to_unsafe, digest.to_unsafe_md) == 0
         raise CertificateError.new("X509_sign")
       end
     end
