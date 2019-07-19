@@ -17,11 +17,11 @@ module OpenSSL::X509
       Extension.new(self, oid, value, critical)
     end
 
-    def subject_certificate=(cert : Certificate)
+    def subject_certificate=(cert : LibCrypto::X509)
       @subject_cert = cert
     end
 
-    def issuer_certificate=(cert : Certificate)
+    def issuer_certificate=(cert : LibCrypto::X509)
       @issuer_cert = cert
     end
 
