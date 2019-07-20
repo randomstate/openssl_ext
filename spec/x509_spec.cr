@@ -91,4 +91,3 @@ tQIDAQAB
     public_key.to_pem.should eq pkey_pem
   end
 end
-

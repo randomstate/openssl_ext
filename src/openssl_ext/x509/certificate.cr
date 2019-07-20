@@ -2,6 +2,13 @@ module OpenSSL::X509
   class Certificate
     class CertificateError < OpenSSL::Error; end
 
+    def initialize
+      @cert = LibCrypto.x509_new
+      raise Error.new("X509_new") if @cert.null?
+
+      self.version = 2
+    end
+
     def self.new(pem : String)
       io = IO::Memory.new(pem)
       bio = OpenSSL::GETS_BIO.new(io)
