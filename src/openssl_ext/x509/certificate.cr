@@ -7,6 +7,7 @@ module OpenSSL::X509
       raise Error.new("X509_new") if @cert.null?
 
       self.version = 2
+      self.serial = random_serial
     end
 
     def self.new(pem : String)

@@ -9,7 +9,6 @@ name.add_entry "OU", "Root CA"
 name.add_entry "O", "Crystal Shards"
 name.add_entry "C", "US"
 
-root_ca.serial = 1
 root_ca.subject = name
 root_ca.issuer = root_ca.subject
 root_ca.public_key = root_key.public_key
@@ -36,7 +35,6 @@ ca_cert = OpenSSL::X509::Certificate.new(File.read("ca_cert.pem"))
 server_key = OpenSSL::EC.new(384)
 server_cert = OpenSSL::X509::Certificate.new
 
-server_cert.serial = 2
 server_cert.subject = OpenSSL::X509::Name.parse "CN=*.crystal-lang.org"
 server_cert.issuer = ca_cert.subject
 server_cert.public_key = server_key.public_key
