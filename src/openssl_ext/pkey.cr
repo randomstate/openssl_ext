@@ -28,7 +28,7 @@ module OpenSSL
     when LibCrypto::EVP_PKEY_EC
       return EC.new io.dup
     else
-      raise "read pkey faild"
+      return nil
     end
   end
 
@@ -38,8 +38,6 @@ module OpenSSL
 
   abstract class PKey
     class PKeyError < OpenSSL::Error; end
-
-    alias Key = RSA | EC | Nil
 
     def initialize(@pkey : LibCrypto::EvpPKey*, @is_private : Bool)
       raise PKeyError.new "Invalid EVP_PKEY" if @pkey.null?
