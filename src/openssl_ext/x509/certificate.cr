@@ -19,13 +19,12 @@ module OpenSSL::X509
       new x509
     end
 
-    def self.from_pem(io)
-      bio = OpenSSL::GETS_BIO.new(io)
-      x509 = LibCrypto.pem_read_bio_x509(bio, nil, nil, nil)
+    def self.from_pem(pem : String)
+      self.new(pem)
+    end
 
-      raise CertificateError.new "Could not read certificate from the PEM file" unless x509
-
-      new(x509)
+    def self.from_pem(io : IO)
+      self.new(io.gets_to_end)
     end
 
     def version
