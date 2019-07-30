@@ -6,22 +6,27 @@ module OpenSSL
     class EcError < PKeyError; end
 
     def self.new(key : String)
+      self.new(IO::Memory.new(key))
+    end
+
+    def self.new(io : IO)
       priv_key = true
-      bio = GETS_BIO.new(IO::Memory.new(key))
+      bio = GETS_BIO.new(io)
       ec_key = LibCrypto.pem_read_bio_ecprivatekey(bio, nil, nil, nil)
 
-      unless ec_key
-        der = Base64.decode(key)
+      if ec_key.null?
+        der = Base64.decode(io.gets_to_end)
         bio = GETS_BIO.new(IO::Memory.new(der))
         ec_key = LibCrypto.d2i_ecprivatekey_bio(bio, nil)
       end
-      unless ec_key
-        der = Base64.decode(key)
+      if ec_key.null?
+        der = Base64.decode(io.gets_to_end)
         bio = GETS_BIO.new(IO::Memory.new(der))
         ec_key = LibCrypto.d2i_ec_pubkey_bio(bio, nil)
         priv_key = false
       end
-      unless ec_key
+
+      if ec_key.null?
         raise EcError.new "Neither PUB or PRIV key"
       end
       new(priv_key).tap do |pkey|

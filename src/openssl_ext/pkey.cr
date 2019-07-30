@@ -5,8 +5,10 @@ module OpenSSL
   abstract class PKey
     class PKeyError < OpenSSL::Error; end
 
+    alias Key = RSA | EC | Nil
+
     def initialize(@pkey : LibCrypto::EvpPKey*, @is_private : Bool)
-      raise PKeyError.new "Invalid EVP_PKEY" unless @pkey
+      raise PKeyError.new "Invalid EVP_PKEY" if @pkey.null?
     end
 
     def initialize(is_private : Bool)
@@ -30,11 +32,6 @@ module OpenSSL
         bio = GETS_BIO.new(io)
         new(LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase), is_private)
       end
-    end
-
-    def self.new(size : Int32)
-      exponent = 65537.to_u32
-      self.generate(size, exponent)
     end
 
     def to_unsafe

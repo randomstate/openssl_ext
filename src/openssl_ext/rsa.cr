@@ -7,6 +7,39 @@ module OpenSSL
 
     @blinding_on : Bool = false
 
+    def self.new(encoded : String, passphrase = nil, is_private = true)
+      self.new(IO::Memory.new(encoded), passphrase, is_private)
+    end
+
+    def self.new(io : IO, passphrase = nil, is_private = true)
+      priv_key = true
+      bio = GETS_BIO.new(io)
+      rsa_key = LibCrypto.pem_read_bio_rsa_private_key(bio, nil, nil, passphrase)
+
+      if rsa_key.null?
+        der = Base64.decode(io.gets_to_end)
+        bio = GETS_BIO.new(IO::Memory.new(der))
+        rsa_key = LibCrypto.d2i_rsa_private_key_bio(bio, nil)
+      end
+      if rsa_key.null?
+        der = Base64.decode(io.gets_to_end)
+        bio = GETS_BIO.new(IO::Memory.new(der))
+        rsa_key = LibCrypto.d2i_rsa_public_key_bio(bio, nil)
+        priv_key = false
+      end
+      if rsa_key.null?
+        raise RsaError.new "Neither PUB or PRIV key"
+      end
+      new(priv_key).tap do |pkey|
+        LibCrypto.evp_pkey_assign(pkey, LibCrypto::EVP_PKEY_RSA, rsa_key.as Pointer(Void))
+      end
+    end
+
+    def self.new(size : Int32)
+      exponent = 65537.to_u32
+      self.generate(size, exponent)
+    end
+
     def self.generate(size : Int32, exponent : UInt32)
       rsa_pointer = LibCrypto.rsa_new
 
