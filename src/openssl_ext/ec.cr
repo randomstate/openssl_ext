@@ -11,7 +11,7 @@ module OpenSSL
 
     def self.new(io : IO)
       priv_key = true
-      bio = GETS_BIO.new(io)
+      bio = GETS_BIO.new(io.dup)
       ec_key = LibCrypto.pem_read_bio_ecprivatekey(bio, nil, nil, nil)
 
       if ec_key.null?
@@ -25,10 +25,10 @@ module OpenSSL
         ec_key = LibCrypto.d2i_ec_pubkey_bio(bio, nil)
         priv_key = false
       end
-
       if ec_key.null?
         raise EcError.new "Neither PUB or PRIV key"
       end
+
       new(priv_key).tap do |pkey|
         LibCrypto.evp_pkey_assign(pkey, LibCrypto::EVP_PKEY_EC, ec_key.as Pointer(Void))
       end
@@ -74,7 +74,7 @@ module OpenSSL
     end
 
     def to_pem(io)
-      bio = OpenSSL::GETS_BIO.new(io)
+      bio = GETS_BIO.new(io)
       if private?
         LibCrypto.pem_write_bio_ecprivatekey(bio, ec, nil, nil, 0, nil, nil)
       else

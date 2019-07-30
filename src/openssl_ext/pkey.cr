@@ -2,6 +2,40 @@ require "./cipher"
 require "./bio"
 
 module OpenSSL
+  def self.parse_pkey(encoded : String, passphrase = nil, is_private = true)
+    self.parse_pkey(IO::Memory.new(encoded), passphrase, is_private)
+  end
+
+  def self.parse_pkey(io : IO, passphrase = nil, is_private = true)
+    if is_private
+      begin
+        bio = GETS_BIO.new(io.dup)
+        pkey = LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase)
+      rescue
+        bio = GETS_BIO.new(IO::Memory.new(Base64.decode(io.to_s)))
+        pkey = LibCrypto.d2i_private_key_bio(bio, nil)
+      end
+    else
+      bio = GETS_BIO.new(io.dup)
+      pkey = LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase)
+    end
+
+    id = self.get_pkey_id pkey
+
+    case id
+    when LibCrypto::EVP_PKEY_RSA
+      return RSA.new io.dup
+    when LibCrypto::EVP_PKEY_EC
+      return EC.new io.dup
+    else
+      raise "read pkey faild"
+    end
+  end
+
+  def self.get_pkey_id(pkey : LibCrypto::EvpPKey*) : Int32
+    LibCrypto.evp_pkey_id(pkey)
+  end
+
   abstract class PKey
     class PKeyError < OpenSSL::Error; end
 
@@ -22,14 +56,14 @@ module OpenSSL
     def self.new(io : IO, passphrase = nil, is_private = true)
       if is_private
         begin
-          bio = GETS_BIO.new(io)
+          bio = GETS_BIO.new(io.dup)
           new(LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase), is_private)
         rescue
           bio = GETS_BIO.new(IO::Memory.new(Base64.decode(io.to_s)))
           new(LibCrypto.d2i_private_key_bio(bio, nil), is_private)
         end
       else
-        bio = GETS_BIO.new(io)
+        bio = GETS_BIO.new(io.dup)
         new(LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase), is_private)
       end
     end

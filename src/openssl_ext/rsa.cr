@@ -13,7 +13,7 @@ module OpenSSL
 
     def self.new(io : IO, passphrase = nil, is_private = true)
       priv_key = true
-      bio = GETS_BIO.new(io)
+      bio = GETS_BIO.new(io.dup)
       rsa_key = LibCrypto.pem_read_bio_rsa_private_key(bio, nil, nil, passphrase)
 
       if rsa_key.null?
