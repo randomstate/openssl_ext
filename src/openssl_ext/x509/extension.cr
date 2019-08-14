@@ -15,7 +15,7 @@ module OpenSSL::X509
         str << "critical," if critical
         str << value
       end
-      @ext = LibCrypto.x509v3_ext_nconf_nid(nil, ctx, nid, valstr)
+      @ext = LibCrypto.x509v3_ext_conf_nid(nil, ctx, nid, valstr)
       raise Error.new("X509V3_EXT_nconf_nid") if @ext.null?
     end
   end

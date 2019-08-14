@@ -98,7 +98,7 @@ module OpenSSL::X509
       pointerof(@cert)
     end
 
-    private def random_serial
+    private def random_serial : Int64
       long = uninitialized Int64
       ptr = pointerof(long).as Int32*
       ptr[0] = rand(Int32::MIN..Int32::MAX)
