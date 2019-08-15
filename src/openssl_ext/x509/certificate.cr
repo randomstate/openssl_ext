@@ -1,13 +1,15 @@
-module OpenSSL::X509
-  class Certificate
-    class CertificateError < OpenSSL::Error; end
+require "./x509"
 
+module OpenSSL::X509
+  class CertificateError < X509Error; end
+
+  class Certificate
     def initialize
       @cert = LibCrypto.x509_new
-      raise Error.new("X509_new") if @cert.null?
+      raise X509Error.new("X509_new") if @cert.null?
 
       self.version = 2
-      self.serial = random_serial
+      self.serial = OpenSSL::BN.rand
     end
 
     def self.new(pem : String)
@@ -35,14 +37,19 @@ module OpenSSL::X509
       LibCrypto.x509_set_version(self, 2_i64)
     end
 
-    def serial
+    def serial : OpenSSL::BN
       sn = LibCrypto.x509_get_serialnumber(self)
-      LibCrypto.asn1_integer_get(sn)
+      OpenSSL::BN.new LibCrypto.asn1_integer_to_bn(sn)
     end
 
-    def serial=(index : Int64)
-      sn = LibCrypto.x509_get_serialnumber(self)
-      LibCrypto.asn1_integer_set(sn, index)
+    def serial=(index : UInt64)
+      bn = OpenSSL::BN.new(index)
+      self.serial = bn
+    end
+
+    def serial=(bn : OpenSSL::BN)
+      sn = LibCrypto.bn_to_asn1_integer(bn, nil)
+      LibCrypto.x509_set_serialnumber(self, sn)
     end
 
     def issuer
@@ -77,7 +84,7 @@ module OpenSSL::X509
       LibCrypto.x509_set_notafter(self, time)
     end
 
-    def sign(pkey : OpenSSL::PKey, digest : Digest)
+    def sign(pkey : OpenSSL::PKey::PKey, digest : Digest)
       if LibCrypto.x509_sign(self, pkey.to_unsafe, digest.to_unsafe_md) == 0
         raise CertificateError.new("X509_sign")
       end
@@ -96,14 +103,6 @@ module OpenSSL::X509
 
     def to_unsafe_pointer
       pointerof(@cert)
-    end
-
-    private def random_serial : Int64
-      long = uninitialized Int64
-      ptr = pointerof(long).as Int32*
-      ptr[0] = rand(Int32::MIN..Int32::MAX)
-      ptr[1] = rand(Int32::MIN..Int32::MAX)
-      long
     end
   end
 end

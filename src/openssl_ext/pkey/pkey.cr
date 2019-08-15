@@ -1,26 +1,39 @@
-require "./cipher"
-require "./bio"
+require "../cipher"
+require "../bio/*"
 
-module OpenSSL
-  def self.parse_pkey(encoded : String, passphrase = nil, is_private = true)
-    self.parse_pkey(IO::Memory.new(encoded), passphrase, is_private)
+module OpenSSL::PKey
+  def self.read(encoded : String, passphrase = nil)
+    self.read(IO::Memory.new(encoded), passphrase)
   end
 
-  def self.parse_pkey(io : IO, passphrase = nil, is_private = true)
-    if is_private
+  def self.read(io : IO, passphrase = nil)
+    content = Bytes.new(io.size)
+    io.read(content)
+
+    bio = GETS_BIO.new(io)
+    pkey = LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase)
+    io.rewind
+
+    if pkey.null?
       begin
-        bio = GETS_BIO.new(io.dup)
-        pkey = LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase)
-      rescue
-        bio = GETS_BIO.new(IO::Memory.new(Base64.decode(io.to_s)))
+        decoded = Base64.decode(content)
+        buf = IO::Memory.new(decoded)
+
+        bio = GETS_BIO.new(buf)
         pkey = LibCrypto.d2i_private_key_bio(bio, nil)
+      rescue Base64::Error
       end
-    else
-      bio = GETS_BIO.new(io.dup)
-      pkey = LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase)
     end
 
-    id = self.get_pkey_id pkey
+    if pkey.null?
+      bio = GETS_BIO.new(io)
+      pkey = LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase)
+      io.rewind
+    end
+
+    raise PKeyError.new if pkey.null?
+
+    id = self.get_pkey_id(pkey)
 
     case id
     when LibCrypto::EVP_PKEY_RSA
@@ -28,7 +41,8 @@ module OpenSSL
     when LibCrypto::EVP_PKEY_EC
       return EC.new io.dup
     else
-      return nil
+      ret = uninitialized PKey
+      return ret
     end
   end
 
@@ -36,9 +50,9 @@ module OpenSSL
     LibCrypto.evp_pkey_id(pkey)
   end
 
-  abstract class PKey
-    class PKeyError < OpenSSL::Error; end
+  class PKeyError < OpenSSL::Error; end
 
+  abstract class PKey
     def initialize(@pkey : LibCrypto::EvpPKey*, @is_private : Bool)
       raise PKeyError.new "Invalid EVP_PKEY" if @pkey.null?
     end

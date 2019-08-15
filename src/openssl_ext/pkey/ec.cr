@@ -1,35 +1,47 @@
-require "./bio/mem_bio"
+require "../bio/mem_bio"
 require "./pkey"
 
-module OpenSSL
-  class EC < PKey
-    class EcError < PKeyError; end
+module OpenSSL::PKey
+  class EcError < PKeyError; end
 
+  class EC < PKey
     def self.new(key : String)
       self.new(IO::Memory.new(key))
     end
 
     def self.new(io : IO)
-      priv_key = true
-      bio = GETS_BIO.new(io.dup)
+      content = Bytes.new(io.size)
+      io.read(content)
+
+      priv = true
+
+      bio = GETS_BIO.new(IO::Memory.new(content))
       ec_key = LibCrypto.pem_read_bio_ecprivatekey(bio, nil, nil, nil)
+      io.rewind
 
       if ec_key.null?
-        der = Base64.decode(io.gets_to_end)
-        bio = GETS_BIO.new(IO::Memory.new(der))
-        ec_key = LibCrypto.d2i_ecprivatekey_bio(bio, nil)
+        begin
+          decoded = Base64.decode(content)
+          buf = IO::Memory.new(decoded)
+
+          bio = GETS_BIO.new(buf)
+          ec_key = LibCrypto.d2i_ecprivatekey_bio(bio, nil)
+        rescue Base64::Error
+        end
       end
+
       if ec_key.null?
-        der = Base64.decode(io.gets_to_end)
-        bio = GETS_BIO.new(IO::Memory.new(der))
-        ec_key = LibCrypto.d2i_ec_pubkey_bio(bio, nil)
-        priv_key = false
+        bio = GETS_BIO.new(io)
+        ec_key = LibCrypto.pem_read_bio_ec_pubkey(bio, nil, nil, nil)
+        priv = false unless ec_key.null?
+        io.rewind
       end
+
       if ec_key.null?
         raise EcError.new "Neither PUB or PRIV key"
       end
 
-      new(priv_key).tap do |pkey|
+      new(priv).tap do |pkey|
         LibCrypto.evp_pkey_assign(pkey, LibCrypto::EVP_PKEY_EC, ec_key.as Pointer(Void))
       end
     end
@@ -67,7 +79,7 @@ module OpenSSL
       f1 = ->LibCrypto.i2d_ec_pubkey
       f2 = ->LibCrypto.d2i_ec_pubkey
 
-      pub_ec = LibCrypto.asn1_dup(f1.pointer, f2.pointer, ec().as(Void*)).as LibCrypto::EcKey*
+      pub_ec = LibCrypto.asn1_dup(f1.pointer, f2.pointer, ec.as(Void*))
       EC.new(false).tap do |pkey|
         LibCrypto.evp_pkey_assign(pkey, LibCrypto::EVP_PKEY_EC, pub_ec.as Pointer(Void))
       end

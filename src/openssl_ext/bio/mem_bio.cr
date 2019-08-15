@@ -1,8 +1,6 @@
 require "../bio"
 
 class OpenSSL::MemBIO < IO
-  class BioError < Error; end
-
   def initialize(@bio : LibCrypto::Bio*)
     raise BioError.new "Invalid handle" unless @bio
   end

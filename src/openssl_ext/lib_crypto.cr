@@ -220,9 +220,32 @@ lib LibCrypto
   fun asn1_time_free = ASN1_TIME_free(t : ASN1_TIME)
   fun asn1_integer_get = ASN1_INTEGER_get(a : ASN1_INTEGER) : LibC::Long
   fun asn1_integer_set = ASN1_INTEGER_set(a : ASN1_INTEGER, v : LibC::Long) : LibC::Int
+  fun bn_to_asn1_integer = BN_to_ASN1_INTEGER(bn : Bignum*, ai : ASN1_INTEGER) : ASN1_INTEGER
+  fun asn1_integer_to_bn = ASN1_INTEGER_to_BN(ai : ASN1_INTEGER, bn : Bignum*) : Bignum*
 
-  fun bignum_new = BN_new : Bignum*
-  fun set_bignum_from_decimal = BN_dec2bn(a : Bignum**, str : LibC::Char*) : LibC::Int
+  fun bn_new = BN_new : Bignum*
+  fun bn_clear = BN_clear(bn : Bignum*)
+  fun bn_free = BN_free(bn : Bignum*)
+  fun bn_clear_free = BN_clear_free(bn : Bignum*)
+  fun bn_print = BN_print(bio : Bio*, bn : Bignum*) : LibC::Int
+  fun bn_copy = BN_copy(to : Bignum*, from : Bignum*) : Bignum*
+  fun bn_dup = BN_dup(from : Bignum*) : Bignum*
+  fun bn_rand = BN_rand(rnd : Bignum*, bits : LibC::Int, top : LibC::Int, bottom : LibC::Int) : LibC::Int
+  fun bn_pseudo_rand = BN_pseudo_rand(rnd : Bignum*, bits : LibC::Int, top : LibC::Int, bottom : LibC::Int) : LibC::Int
+  fun bn_rand_range = BN_rand_range(rnd : Bignum*, range : Bignum*) : LibC::Int
+  fun bn_pseudo_rand_range = BN_pseudo_rand_range(rnd : Bignum*, range : Bignum*) : LibC::Int
+
+  fun bn_value_one = BN_value_one : Bignum*
+  fun bn_num_bits = BN_num_bits(bn : Bignum*) : LibC::Int
+  fun bn_set_word = BN_set_word(bn : Bignum*, w : UInt64) : LibC::Int
+  fun bn_to_dec = BN_bn2dec(bn : Bignum*) : LibC::Char*
+  fun bn_to_hex = BN_bn2hex(bn : Bignum*) : LibC::Char*
+  fun bn_from_dec = BN_dec2bn(a : Bignum**, str : LibC::Char*) : LibC::Int
+  fun bn_from_hex = BN_hex2bn(a : Bignum**, str : LibC::Char*) : LibC::Int
+  fun bn_to_mpi = BN_bn2mpi(a : Bignum*, to : LibC::Char*) : LibC::Int
+  fun bn_to_bin = BN_bn2bin(a : Bignum*, to : LibC::Char*) : LibC::Int
+  fun bn_from_mpi = BN_mpi2bn(str : LibC::Char*, len : LibC::Int, ret : Bignum*) : Bignum*
+  fun bn_from_bin = BN_bin2bn(str : LibC::Char*, len : LibC::Int, ret : Bignum*) : Bignum*
 
   fun bio_s_mem = BIO_s_mem : BioMethod*
   fun bio_new = BIO_new(type : BioMethod*) : Bio*
@@ -268,6 +291,7 @@ lib LibCrypto
   fun pem_read_bio_public_key = PEM_read_bio_PUBKEY(bp : Bio*, x : EvpPKey**, cb : PasswordCallback, u : Void*) : EvpPKey*
 
   fun pem_read_bio_rsa_private_key = PEM_read_bio_RSAPrivateKey(bp : Bio*, x : Rsa**, cb : PasswordCallback, u : Void*) : Rsa*
+  fun pem_read_bio_rsa_pubkey = PEM_read_bio_RSA_PUBKEY(bp : Bio*, x : Rsa**, cb : PasswordCallback, u : Void*) : Rsa*
   fun pem_read_bio_rsa_public_key = PEM_read_bio_RSAPublicKey(bp : Bio*, x : Rsa**, cb : PasswordCallback, u : Void*) : Rsa*
   fun pem_write_bio_rsa_private_key = PEM_write_bio_RSAPrivateKey(bp : Bio*, x : Rsa*, enc : EVP_MD*, kstr : UInt8*, klen : LibC::Int, cb : PasswordCallback, u : Void*) : LibC::Int
   fun pem_write_bio_rsa_public_key = PEM_write_bio_RSAPublicKey(bp : Bio*, x : Rsa*) : LibC::Int
@@ -332,6 +356,7 @@ lib LibCrypto
   fun x509_get_version = X509_get_version(x509 : X509) : Int64
   fun x509_set_version = X509_set_version(x509 : X509, version : Int64) : Int32
   fun x509_set_public_key = X509_set_pubkey(x509 : X509, pkey : EvpPKey*) : Int32
+  fun x509_set_serialnumber = X509_set_serialNumber(x509 : X509, serial : ASN1_INTEGER) : Int32
   fun x509_set_notbefore = X509_set1_notBefore(x509 : X509, tm : ASN1_TIME) : Int32
   fun x509_set_notafter = X509_set1_notAfter(x509 : X509, tm : ASN1_TIME) : Int32
   fun x509_set_issuer_name = X509_set_issuer_name(x509 : X509, name : X509_NAME) : Int32
