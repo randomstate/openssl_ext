@@ -2,7 +2,7 @@ module OpenSSL
   class BNError < Error; end
 
   class BN
-    include Comparable(BN)
+    # include Comparable(BN)
 
     BN_RAND_TOP_ANY    = -1
     BN_RAND_TOP_ONE    =  0
@@ -20,7 +20,7 @@ module OpenSSL
 
     def self.new(num : UInt64)
       new.tap do |bn|
-        LibCrypto.bn_set_word(bn, num)
+        LibCrypto.bn_set_word(bn.to_unsafe, num)
       end
     end
 
@@ -59,7 +59,7 @@ module OpenSSL
     def print
       bio = OpenSSL::MemBIO.new
       LibCrypto.bn_print(bio, self)
-      puts bio.to_string
+      bio.to_string
     end
 
     def size

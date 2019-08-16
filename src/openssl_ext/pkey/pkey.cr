@@ -8,7 +8,8 @@ module OpenSSL::PKey
 
   def self.read(io : IO, passphrase = nil)
     content = Bytes.new(io.size)
-    io.read(content)
+    io.read_fully(content)
+    io.rewind
 
     bio = GETS_BIO.new(io)
     pkey = LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase)
@@ -21,6 +22,7 @@ module OpenSSL::PKey
 
         bio = GETS_BIO.new(buf)
         pkey = LibCrypto.d2i_private_key_bio(bio, nil)
+        buf.rewind
       rescue Base64::Error
       end
     end
@@ -48,6 +50,36 @@ module OpenSSL::PKey
 
   def self.get_pkey_id(pkey : LibCrypto::EvpPKey*) : Int32
     LibCrypto.evp_pkey_id(pkey)
+  end
+
+  def self.check_public_key(pkey : PKey)
+    raise PKeyError.new("pkey missing") unless pkey
+
+    case self.get_pkey_id(pkey.to_unsafe)
+    when LibCrypto::EVP_PKEY_RSA
+      rsa = LibCrypto.evp_pkey_get0_rsa(pkey)
+
+      n = OpenSSL::BN.new
+      e = OpenSSL::BN.new
+
+      n_ptr = n.to_unsafe
+      e_ptr = e.to_unsafe
+
+      LibCrypto.rsa_get0_key(rsa, pointerof(n_ptr), pointerof(e_ptr), nil)
+
+      unless n_ptr.null? || e_ptr.null?
+        return true
+      end
+    when LibCrypto::EVP_PKEY_EC
+      ec = LibCrypto.evp_pkey_get0_ec_key(pkey)
+      ec_ptr = LibCrypto.ec_key_get0_public_key(ec)
+      unless ec_ptr.null?
+        return true
+      end
+    else
+      return false
+    end
+    raise PKeyError.new "public key missing"
   end
 
   class PKeyError < OpenSSL::Error; end

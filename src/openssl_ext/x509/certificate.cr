@@ -64,9 +64,24 @@ module OpenSSL::X509
     end
 
     def public_key
+      io = IO::Memory.new
+      bio = OpenSSL::GETS_BIO.new(io)
+
       begin
         pkey = LibCrypto.x509_get_public_key(self)
-        RSA.new(pkey, false)
+
+        LibCrypto.pem_write_bio_public_key(bio, pkey)
+        io.rewind
+
+        case OpenSSL::PKey.get_pkey_id(pkey)
+        when LibCrypto::EVP_PKEY_RSA
+          return OpenSSL::PKey::RSA.new io.dup
+        when LibCrypto::EVP_PKEY_EC
+          return OpenSSL::PKey::EC.new io.dup
+        else
+          ret = uninitialized OpenSSL::PKey::PKey
+          return ret
+        end
       rescue
         raise CertificateError.new "X509_get_pubkey"
       end
@@ -84,9 +99,36 @@ module OpenSSL::X509
       LibCrypto.x509_set_notafter(self, time)
     end
 
+    def signature_algorithm
+      begin
+        bio = OpenSSL::MemBIO.new
+
+        algor = LibCrypto.x509_get0_tbs_sigalg(self)
+        if LibCrypto.i2a_asn1_object(bio, algor.algorithm) != 0
+          raise CertificateError.new
+        end
+        bio.to_string
+      rescue ex : IO::Error
+        raise ex
+      end
+    end
+
     def sign(pkey : OpenSSL::PKey::PKey, digest : Digest)
       if LibCrypto.x509_sign(self, pkey.to_unsafe, digest.to_unsafe_md) == 0
         raise CertificateError.new("X509_sign")
+      end
+    end
+
+    def verify(pkey : OpenSSL::PKey::PKey)
+      return false unless OpenSSL::PKey.check_public_key(pkey)
+
+      case LibCrypto.x509_verify(self, pkey)
+      when 1
+        return true
+      when 0
+        return false
+      else
+        raise CertificateError.new
       end
     end
 
