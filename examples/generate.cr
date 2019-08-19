@@ -20,13 +20,10 @@ root_ca.sign(root_key, OpenSSL::Digest::SHA256.new)
 File.write "ca_cert.pem", root_ca.to_pem
 File.write "ca_key.pem", root_key.to_pem
 
-ca_key = OpenSSL::PKey::RSA.new(File.read("ca_key.pem"))
-ca_cert = OpenSSL::X509::Certificate.new(File.read("ca_cert.pem"))
-
 server_key = OpenSSL::PKey::RSA.new(2048)
 server_cert = OpenSSL::X509::Certificate.new
 server_cert.subject = OpenSSL::X509::Name.parse "CN=*.crystal-lang.org"
-server_cert.issuer = ca_cert.subject
+server_cert.issuer = root_ca.subject
 server_cert.public_key = server_key.public_key
 server_cert.not_before = OpenSSL::ASN1::Time.days_from_now(0)
 server_cert.not_after = OpenSSL::ASN1::Time.days_from_now(365)
@@ -44,7 +41,7 @@ server_cert.add_extension(extend_usage)
 server_cert.add_extension(san_ext)
 server_cert.add_extension(ef.create_extension("subjectKeyIdentifier", "hash"))
 server_cert.add_extension(ef.create_extension("authorityKeyIdentifier", "keyid:always"))
-server_cert.sign(server_key, OpenSSL::Digest::SHA256.new)
+server_cert.sign(root_key, OpenSSL::Digest::SHA256.new)
 
 File.write "server_cert.pem", server_cert.to_pem
 File.write "server_key.pem", server_key.to_pem
