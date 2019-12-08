@@ -1,17 +1,69 @@
-require "big"
 require "./pkey"
 
-module OpenSSL
-  class RSA < PKey
-    class RsaError < PKeyError; end
+module OpenSSL::PKey
+  class RsaError < PKeyError; end
 
+  class RSA < PKey
     @blinding_on : Bool = false
+
+    def self.new(encoded : String, passphrase = nil)
+      self.new(IO::Memory.new(encoded), passphrase)
+    end
+
+    def self.new(io : IO, passphrase = nil)
+      content = Bytes.new(io.size)
+      io.read(content)
+      io.rewind
+
+      priv = true
+
+      bio = GETS_BIO.new(io)
+      rsa_key = LibCrypto.pem_read_bio_rsa_private_key(bio, nil, nil, passphrase)
+      io.rewind
+
+      if rsa_key.null?
+        begin
+          decoded = Base64.decode(content)
+          buf = IO::Memory.new(decoded)
+
+          bio = GETS_BIO.new(buf)
+          rsa_key = LibCrypto.d2i_rsa_private_key_bio(bio, nil)
+        rescue Base64::Error
+        end
+      end
+
+      if rsa_key.null?
+        bio = GETS_BIO.new(io)
+        rsa_key = LibCrypto.pem_read_bio_rsa_public_key(bio, nil, nil, passphrase)
+        priv = false unless rsa_key.null?
+        io.rewind
+      end
+
+      if rsa_key.null?
+        bio = GETS_BIO.new(io)
+        rsa_key = LibCrypto.pem_read_bio_rsa_pubkey(bio, nil, nil, passphrase)
+        priv = false unless rsa_key.null?
+        io.rewind
+      end
+
+      if rsa_key.null?
+        raise RsaError.new "Neither PUB or PRIV key"
+      end
+
+      new(priv).tap do |pkey|
+        LibCrypto.evp_pkey_assign(pkey, LibCrypto::EVP_PKEY_RSA, rsa_key.as Pointer(Void))
+      end
+    end
+
+    def self.new(size : Int32)
+      exponent = 65537.to_u32
+      self.generate(size, exponent)
+    end
 
     def self.generate(size : Int32, exponent : UInt32)
       rsa_pointer = LibCrypto.rsa_new
 
-      exponent_bn = LibCrypto.bignum_new
-      LibCrypto.set_bignum_from_decimal(pointerof(exponent_bn), exponent.to_s)
+      exponent_bn = OpenSSL::BN.from_dec(exponent.to_s)
       LibCrypto.rsa_generate_key_ex(rsa_pointer, size, exponent_bn, nil)
 
       new(true).tap do |pkey|

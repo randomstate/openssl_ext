@@ -1,3 +1,7 @@
+module OpenSSL
+  class BioError < Error; end
+end
+
 struct OpenSSL::GETS_BIO
   GETS_BIO = begin
     crystal_bio = OpenSSL::BIO::CRYSTAL_BIO

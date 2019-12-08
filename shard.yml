@@ -1,7 +1,8 @@
 name: openssl_ext
-version: 1.0.0
+version: 1.1.0
 
 authors:
   - Connor Imrie <3436576+CImrie@users.noreply.github.com>
+  - Kevin <root@unixs.org>
 
 license: MIT

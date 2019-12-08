@@ -1,15 +1,95 @@
-require "./cipher"
-require "./bio"
+require "../cipher"
+require "../bio/*"
 
-module OpenSSL
-  abstract class PKey
-    class PKeyError < OpenSSL::Error; end
+module OpenSSL::PKey
+  def self.read(encoded : String, passphrase = nil)
+    self.read(IO::Memory.new(encoded), passphrase)
+  end
 
-    def initialize(@pkey : LibCrypto::EvpPKey*, @is_private : Bool)
-      raise PKeyError.new "Invalid EVP_PKEY" unless @pkey
+  def self.read(io : IO, passphrase = nil)
+    content = Bytes.new(io.size)
+    io.read_fully(content)
+    io.rewind
+
+    bio = GETS_BIO.new(io)
+    pkey = LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase)
+    io.rewind
+
+    if pkey.null?
+      begin
+        decoded = Base64.decode(content)
+        buf = IO::Memory.new(decoded)
+
+        bio = GETS_BIO.new(buf)
+        pkey = LibCrypto.d2i_private_key_bio(bio, nil)
+        buf.rewind
+      rescue Base64::Error
+      end
     end
 
-    def initialize(is_private)
+    if pkey.null?
+      bio = GETS_BIO.new(io)
+      pkey = LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase)
+      io.rewind
+    end
+
+    raise PKeyError.new if pkey.null?
+
+    id = self.get_pkey_id(pkey)
+
+    case id
+    when LibCrypto::EVP_PKEY_RSA
+      return RSA.new io.dup
+    when LibCrypto::EVP_PKEY_EC
+      return EC.new io.dup
+    else
+      ret = uninitialized PKey
+      return ret
+    end
+  end
+
+  def self.get_pkey_id(pkey : LibCrypto::EvpPKey*) : Int32
+    LibCrypto.evp_pkey_id(pkey)
+  end
+
+  def self.check_public_key(pkey : PKey)
+    raise PKeyError.new("pkey missing") unless pkey
+
+    case self.get_pkey_id(pkey.to_unsafe)
+    when LibCrypto::EVP_PKEY_RSA
+      rsa = LibCrypto.evp_pkey_get0_rsa(pkey)
+
+      n = OpenSSL::BN.new
+      e = OpenSSL::BN.new
+
+      n_ptr = n.to_unsafe
+      e_ptr = e.to_unsafe
+
+      LibCrypto.rsa_get0_key(rsa, pointerof(n_ptr), pointerof(e_ptr), nil)
+
+      unless n_ptr.null? || e_ptr.null?
+        return true
+      end
+    when LibCrypto::EVP_PKEY_EC
+      ec = LibCrypto.evp_pkey_get0_ec_key(pkey)
+      ec_ptr = LibCrypto.ec_key_get0_public_key(ec)
+      unless ec_ptr.null?
+        return true
+      end
+    else
+      return false
+    end
+    raise PKeyError.new "public key missing"
+  end
+
+  class PKeyError < OpenSSL::Error; end
+
+  abstract class PKey
+    def initialize(@pkey : LibCrypto::EvpPKey*, @is_private : Bool)
+      raise PKeyError.new "Invalid EVP_PKEY" if @pkey.null?
+    end
+
+    def initialize(is_private : Bool)
       initialize(LibCrypto.evp_pkey_new, is_private)
     end
 
@@ -21,21 +101,16 @@ module OpenSSL
     def self.new(io : IO, passphrase = nil, is_private = true)
       if is_private
         begin
-          bio = GETS_BIO.new(io)
+          bio = GETS_BIO.new(io.dup)
           new(LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase), is_private)
         rescue
           bio = GETS_BIO.new(IO::Memory.new(Base64.decode(io.to_s)))
           new(LibCrypto.d2i_private_key_bio(bio, nil), is_private)
         end
       else
-        bio = GETS_BIO.new(io)
+        bio = GETS_BIO.new(io.dup)
         new(LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase), is_private)
       end
-    end
-
-    def self.new(size : Int32)
-      exponent = 65537.to_u32
-      self.generate(size, exponent)
     end
 
     def to_unsafe
