@@ -75,7 +75,7 @@ mfzRpDQdyLFZqfGFyYQ6WSw3EFqIunkL8WPWRpG++5g=
 
     cert = Certificate.new pem
     public_key = cert.public_key
-    (public_key.is_a? OpenSSL::RSA).should be_true
+    (public_key.is_a? OpenSSL::PKey::RSA).should be_true
 
     pkey_pem = "-----BEGIN PUBLIC KEY-----
 MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAmvTb9UkWU1kFk28eqS4U

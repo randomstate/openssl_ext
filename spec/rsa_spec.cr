@@ -1,19 +1,19 @@
 require "./spec_helper"
 
 require "spec"
-require "../src/openssl_ext/rsa"
+require "../src/openssl_ext/pkey/rsa"
 
-describe OpenSSL::RSA do
+describe OpenSSL::PKey::RSA do
   describe "instantiating and generate a key" do
     it "can instantiate and generate for a given key size" do
-      pkey = OpenSSL::RSA.new(512)
+      pkey = OpenSSL::PKey::RSA.new(512)
       pkey.private?.should be_true
       pkey.public?.should be_false
 
       pkey.public_key.public?.should be_true
     end
     it "can export to PEM format" do
-      pkey = OpenSSL::RSA.new(512)
+      pkey = OpenSSL::PKey::RSA.new(512)
       pkey.private?.should be_true
 
       pem = pkey.to_pem
@@ -23,24 +23,24 @@ describe OpenSSL::RSA do
       isEmpty.should be_false
     end
     it "can export to DER format" do
-      pkey = OpenSSL::RSA.new(512)
+      pkey = OpenSSL::PKey::RSA.new(512)
       pkey.private?.should be_true
       pem = pkey.to_pem
       der = pkey.to_der
 
-      pkey = OpenSSL::RSA.new(der)
+      pkey = OpenSSL::PKey::RSA.new(der)
       pkey.to_pem.should eq pem
       pkey.to_der.should eq der
     end
     it "can instantiate with a PEM encoded key" do
-      pem = OpenSSL::RSA.new(1024).to_pem
-      pkey = OpenSSL::RSA.new(pem)
+      pem = OpenSSL::PKey::RSA.new(1024).to_pem
+      pkey = OpenSSL::PKey::RSA.new(pem)
 
       pkey.to_pem.should eq pem
     end
     it "can instantiate with a DER encoded key" do
-      der = OpenSSL::RSA.new(1024).to_der
-      pkey = OpenSSL::RSA.new(der)
+      der = OpenSSL::PKey::RSA.new(1024).to_der
+      pkey = OpenSSL::PKey::RSA.new(der)
 
       pkey.to_der.should eq der
     end
@@ -73,7 +73,7 @@ kAK6rBib7m+r78eCRNPCh3nkW4mCE3R9z6QPBW//3FnTEqmTljK4Fa+uA59jpMOb
 
       # encrypted_pem = pkey.to_pem(cipher, "test")
 
-      decoded = OpenSSL::RSA.new(encrypted_pem, "test")
+      decoded = OpenSSL::PKey::RSA.new(encrypted_pem, "test")
 
       not_encrypted = "-----BEGIN RSA PRIVATE KEY-----
 MIICXQIBAAKBgQC5+5+xnWggxNnnmCSNbIwTQFjcyawcvmPupeXs10sfhUAHUxtm
@@ -91,19 +91,19 @@ adot7XDn0Ob4lTpiLv0CQQDkECppYQ4N0ecegg1xPVqf19fHo/WGHGuScjfUPTI/
 k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
 -----END RSA PRIVATE KEY-----"
 
-      not_encrypted_pkey = OpenSSL::RSA.new(not_encrypted)
+      not_encrypted_pkey = OpenSSL::PKey::RSA.new(not_encrypted)
       decoded.to_pem.should eq not_encrypted_pkey.to_pem
     end
   end
   describe "RSA-blinding" do
     it "can turn blinding on" do
-      rsa = OpenSSL::RSA.new(512)
+      rsa = OpenSSL::PKey::RSA.new(512)
       rsa.blinding_on!
 
       rsa.blinding_on?.should be_true
     end
     it "can turn blinding off" do
-      rsa = OpenSSL::RSA.new(512)
+      rsa = OpenSSL::PKey::RSA.new(512)
       rsa.blinding_on!
       rsa.blinding_off!
 
@@ -112,21 +112,21 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
   end
   describe "encrypting / decrypting" do
     it "can encrypt a string using its private key and decrypt with public key" do
-      rsa = OpenSSL::RSA.new(512)
+      rsa = OpenSSL::PKey::RSA.new(512)
       encrypted = rsa.private_encrypt "hello world"
       decrypted = rsa.public_decrypt encrypted
 
       String.new(decrypted).should eq "hello world"
     end
     it "can encrypt a string using its public key and decrypt with private key" do
-      rsa = OpenSSL::RSA.new(512)
+      rsa = OpenSSL::PKey::RSA.new(512)
       encrypted = rsa.public_encrypt "hello world"
       decrypted = rsa.private_decrypt encrypted
 
       String.new(decrypted).should eq "hello world"
     end
     it "should be able to sign and verify data" do
-      rsa = OpenSSL::RSA.new(1024)
+      rsa = OpenSSL::PKey::RSA.new(1024)
       digest = OpenSSL::Digest.new("sha256")
       data = "my test data"
 
@@ -150,6 +150,6 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
     x509 = OpenSSL::X509::Certificate.new "-----BEGIN CERTIFICATE-----\nMIIDHDCCAgSgAwIBAgIIa9VSmwIf5zwwDQYJKoZIhvcNAQEFBQAwMTEvMC0GA1UE\nAxMmc2VjdXJldG9rZW4uc3lzdGVtLmdzZXJ2aWNlYWNjb3VudC5jb20wHhcNMTgw\nMzA3MjExOTQ4WhcNMTgwMzI0MDkzNDQ4WjAxMS8wLQYDVQQDEyZzZWN1cmV0b2tl\nbi5zeXN0ZW0uZ3NlcnZpY2VhY2NvdW50LmNvbTCCASIwDQYJKoZIhvcNAQEBBQAD\nggEPADCCAQoCggEBAN1sDxP8oTHQ/5qz/S+QJB1iYLWgZYEFsUQnPyr+mtppI9yr\naS1p1WS5k5I6ygx4Mzoe5y+LUSUEgHyg6VEF+Iojm4vlBfWplovd+7Z39r5Meelt\nzN77EzexDQ1g5c/kZjNHgLaCXewMtqYi8oDb30GHl7aWT5eA680E2d0gJH8Rrtxw\nTegk/ZmRWAzLoBP5mMIr+tH9a83UBua90srBqHFRO7TIXf+B28ltC7UfPdyuQy+Q\n2hzi68y3wuTGEu4yJd7I98J0en4kFv/VhLVZo4cennR/ISP63XqtbdIBvG/ipdIR\nlOfO4MyPl0vRziKCx+KVjHxD989Mtcs3M/kXOdkCAwEAAaM4MDYwDAYDVR0TAQH/\nBAIwADAOBgNVHQ8BAf8EBAMCB4AwFgYDVR0lAQH/BAwwCgYIKwYBBQUHAwIwDQYJ\nKoZIhvcNAQEFBQADggEBAG03Jq/sWdGVG166NmQxcQTtYZCDh9KIQhVMR0v4K6sZ\n0UeUKcoICzyIk0gM0veyVw6lPRSsZthx3oylo7WeDzXVQ72FZVdg8MTi2H9gLFtJ\nJ81rwbGX/Sl5vKN25iPJrW+nzMJYB8wVQplOi94okmJWoBm573DRk2fXukJ93JS4\nb6xz1DQ6Axc6bC3azjSCCWzrx2iT2hyysnqqf2rngCjwSNVACU9xTS1XW40c590w\n9QTV6a885CiUWd4j4dRBwzs0tzvVM9Iwj+bCs6FkB4XrL2+d/sHiFHOF6VsMx7bI\nV1eRIDmhte6pPnDGMz9H/gHk4zGrs6qAxATDuwIIKMc=\n-----END CERTIFICATE-----\n"
     pem = x509.public_key.to_pem
 
-    OpenSSL::RSA.new(pem).to_pem.should eq pem
+    OpenSSL::PKey::RSA.new(pem).to_pem.should eq pem
   end
 end
