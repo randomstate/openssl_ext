@@ -1,4 +1,3 @@
-require "../cipher"
 require "../bio/*"
 
 module OpenSSL::PKey

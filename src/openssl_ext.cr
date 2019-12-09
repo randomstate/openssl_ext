@@ -1,4 +1,5 @@
 require "openssl"
+require "random/secure"
 require "./openssl_ext/*"
 require "./openssl_ext/asn1/*"
 require "./openssl_ext/bio/*"
