@@ -330,6 +330,7 @@ lib LibCrypto
   fun ec_key_set_asn1_flag = EC_KEY_set_asn1_flag(eckey : EC_KEY, asn1_flag : Int32)
   fun ec_key_get0_group = EC_KEY_get0_group(key : EC_KEY) : EC_GROUP
   fun ec_key_set_group = EC_KEY_set_group(key : EC_KEY, group : EC_GROUP) : Int32
+  fun ec_group_get_degree = EC_GROUP_get_degree(group : EC_GROUP) : Int32
   fun ec_curve_nist2nid = EC_curve_nist2nid(s : UInt8*) : LibC::Int
   fun ec_key_get0_public_key = EC_KEY_get0_public_key(key : EC_KEY) : EcPoint*
   fun i2d_ecprivatekey = i2d_ECPrivateKey(key : EC_KEY, out : UInt8**) : Int32
