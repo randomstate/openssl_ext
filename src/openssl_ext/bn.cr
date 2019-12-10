@@ -52,6 +52,13 @@ module OpenSSL
       end
     end
 
+    def self.from_bin(integer : Bytes)
+      new.tap do |bn|
+        unsafe = bn.to_unsafe
+        LibCrypto.bn_from_bin(integer, integer.size, unsafe)
+      end
+    end
+
     def finalize
       LibCrypto.bn_free(self)
     end

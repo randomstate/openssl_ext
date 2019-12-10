@@ -126,7 +126,7 @@ module OpenSSL::PKey
       end
       data = data.to_slice
       to = Slice(UInt8).new max_encrypt_size
-      if LibCrypto.ecdsa_sign(0, data, data.size, to, out len, ec) == 0
+      if LibCrypto.ecdsa_sign(0, data, data.size, to, out len, ec) != 1
         raise EcError.new
       end
       to[0, len]
@@ -145,6 +145,10 @@ module OpenSSL::PKey
       else
         raise EcError.new
       end
+    end
+
+    def group_degree
+      LibCrypto.ec_group_get_degree LibCrypto.ec_key_get0_group(ec)
     end
 
     private def ec
