@@ -28,7 +28,7 @@ mfzRpDQdyLFZqfGFyYQ6WSw3EFqIunkL8WPWRpG++5g=
 -----END CERTIFICATE-----
 "
     from_pem = Certificate.new pem
-    puts from_pem.subject.to_a[0][1].should eq "securetoken.system.gserviceaccount.com"
+    from_pem.subject.to_a[0][1].should eq "securetoken.system.gserviceaccount.com"
   end
   pem = "-----BEGIN CERTIFICATE-----
 MIIDHDCCAgSgAwIBAgIIcTFLZ2AHMiUwDQYJKoZIhvcNAQEFBQAwMTEvMC0GA1UE
