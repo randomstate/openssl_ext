@@ -127,7 +127,7 @@ module OpenSSL
           len = key_size
         end
 
-        buffer.copy_from(pwd.to_slice.pointer(len), len)
+        buffer.copy_from(pwd.to_slice.to_unsafe, len)
 
         return len
       }
