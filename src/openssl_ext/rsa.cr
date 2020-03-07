@@ -1,5 +1,6 @@
 require "big"
 require "./pkey"
+require "./lib_crypto"
 
 module OpenSSL
   class RSA < PKey
