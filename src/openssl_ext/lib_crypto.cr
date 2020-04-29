@@ -217,6 +217,10 @@ lib LibCrypto
     fun rsa_get_{{param.id}} = RSA_get0_{{param.id}}(rsa : Rsa*) : Bignum*
   {% end %}
   
+  fun rsa_set0_key = RSA_set0_key(rsa : Rsa*, n : Bignum*, e : Bignum*, d : Bignum*) : LibC::Int
+  fun rsa_set0_factors = RSA_set0_factors(rsa : Rsa*, p : Bignum*, q : Bignum*) : LibC::Int
+  fun rsa_set0_crt_params = RSA_set0_crt_params(rsa : Rsa*, dmp1 : Bignum*, dmq1 : Bignum*, iqmp : Bignum*) : LibC::Int
+  
   fun pem_read_bio_private_key = PEM_read_bio_PrivateKey(bp : Bio*, x : EvpPKey**, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : EvpPKey*
   fun pem_read_bio_public_key = PEM_read_bio_PUBKEY(bp : Bio*, x : EvpPKey**, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : EvpPKey*
   fun pem_write_bio_rsa_private_key = PEM_write_bio_RSAPrivateKey(bp : Bio*, x : Rsa*, enc : EVP_MD*, kstr : UInt8*, klen : LibC::Int, cb : (LibC::Char*, LibC::Int, LibC::Int, Void* -> LibC::Int), u : Void*) : LibC::Int
