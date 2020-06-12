@@ -51,7 +51,7 @@ describe OpenSSL::PKey::EC do
       sha256 = OpenSSL::Digest::SHA256.new
       data = "my test data"
       sha256.update(data)
-      digest = sha256.digest
+      digest = sha256.final
       signature = ec.ec_sign(digest)
 
       ec.ec_verify(digest, signature).should be_true

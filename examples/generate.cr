@@ -45,4 +45,3 @@ server_cert.sign(root_key, OpenSSL::Digest::SHA256.new)
 
 File.write "server_cert.pem", server_cert.to_pem
 File.write "server_key.pem", server_key.to_pem
-
