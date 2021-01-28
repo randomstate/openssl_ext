@@ -101,14 +101,14 @@ module OpenSSL::PKey
     end
 
     def to_der(io)
-      fn = ->(buf : UInt8** | Nil) {
+      fn = ->(buf : UInt8**) {
         if private?
           LibCrypto.i2d_ecprivatekey(ec, buf)
         else
           LibCrypto.i2d_ec_pubkey(ec, buf)
         end
       }
-      len = fn.call(nil)
+      len = fn.call(Pointer(Pointer(UInt8)).null)
       if len <= 0
         raise EcError.new "Could not output in DER format"
       end
