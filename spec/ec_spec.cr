@@ -48,7 +48,7 @@ describe OpenSSL::PKey::EC do
   describe "encrypting / decrypting" do
     it "should be able to sign and verify data" do
       ec = OpenSSL::PKey::EC.new(384)
-      sha256 = Digest::SHA256.new
+      sha256 = OpenSSL::Digest.new("sha256")
       data = "my test data"
       sha256.update(data)
       digest = sha256.final
