@@ -252,6 +252,7 @@ lib LibCrypto
 
   fun bio_s_mem = BIO_s_mem : BioMethod*
   fun bio_new = BIO_new(type : BioMethod*) : Bio*
+  fun bio_new_file = BIO_new_file(filename : LibC::Char*, mode : LibC::Char*) : Bio*
   fun bio_free = BIO_free(bio : Bio*) : LibC::Int
   fun bio_free_all = BIO_free_all(bio : Bio*)
   fun bio_read = BIO_read(bio : Bio*, data : LibC::Char*, len : LibC::Int) : LibC::Int
@@ -286,6 +287,7 @@ lib LibCrypto
 
   fun rsa_new = RSA_new : Rsa*
   fun rsa_get0_key = RSA_get0_key(r : Rsa*, n : Bignum**, e : Bignum**, d : Bignum*)
+  fun rsa_set0_key = RSA_set0_key(r : Rsa*, n : Bignum*, e : Bignum*, d : Bignum*) : LibC::Int
   fun rsa_public_key_dup = RSAPublicKey_dup(rsa : Rsa*) : Rsa*
   fun rsa_blinding_on = RSA_blinding_on(rsa : Rsa*, ctx : BnCtx) : LibC::Int
   fun rsa_blinding_off = RSA_blinding_off(rsa : Rsa*)
@@ -300,6 +302,7 @@ lib LibCrypto
   fun pem_read_bio_rsa_public_key = PEM_read_bio_RSAPublicKey(bp : Bio*, x : Rsa**, cb : PasswordCallback, u : Void*) : Rsa*
   fun pem_write_bio_rsa_private_key = PEM_write_bio_RSAPrivateKey(bp : Bio*, x : Rsa*, enc : EVP_MD*, kstr : UInt8*, klen : LibC::Int, cb : PasswordCallback, u : Void*) : LibC::Int
   fun pem_write_bio_rsa_public_key = PEM_write_bio_RSAPublicKey(bp : Bio*, x : Rsa*) : LibC::Int
+  fun pem_write_bio_rsa_pub_key = PEM_write_bio_RSA_PUBKEY(bp : Bio*, x : Rsa*) : LibC::Int
   fun pem_write_bio_pkcs8_private_key = PEM_write_bio_PKCS8PrivateKey(bp : Bio*, x : EvpPKey*, enc : EVP_CIPHER*, kstr : LibC::Char*, klen : LibC::Int, cb : PasswordCallback, u : Void*) : LibC::Int
 
   fun d2i_rsa_private_key = d2i_RSAPrivateKey(a : Rsa**, pp : LibC::Char*, length : LibC::Long) : Rsa*
