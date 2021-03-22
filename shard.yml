@@ -1,5 +1,6 @@
 name: openssl_ext
-version: 2.1.2
+version: 2.1.3
+crystal: ">= 0.36.1"
 
 authors:
   - Connor Imrie <3436576+CImrie@users.noreply.github.com>
