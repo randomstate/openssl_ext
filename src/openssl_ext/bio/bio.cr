@@ -2,7 +2,7 @@ module OpenSSL
   class BioError < Error; end
 end
 
-struct OpenSSL::GETS_BIO
+class OpenSSL::GETS_BIO
   GETS_BIO = begin
     crystal_bio = OpenSSL::BIO::CRYSTAL_BIO
     bgets = LibCrypto::BioMethodGets.new do |bio, buffer, len|
@@ -42,6 +42,10 @@ struct OpenSSL::GETS_BIO
     @boxed_io = Box(IO).box(io)
 
     BIO.set_data(@bio, @boxed_io)
+  end
+
+  def finalize
+    LibCrypto.bio_free_all(@bio)
   end
 
   getter io
