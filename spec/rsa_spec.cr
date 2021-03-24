@@ -12,16 +12,18 @@ describe OpenSSL::PKey::RSA do
 
       pkey.public_key.public?.should be_true
     end
+
     it "can export to PEM format" do
       pkey = OpenSSL::PKey::RSA.new(512)
       pkey.private?.should be_true
 
       pem = pkey.to_pem
-      isEmpty = "-----BEGIN PRIVATE KEY-----\n-----END PRIVATE KEY-----\n" == pem
+      is_empty = "-----BEGIN PRIVATE KEY-----\n-----END PRIVATE KEY-----\n" == pem
 
       pem.should contain("BEGIN PRIVATE KEY")
-      isEmpty.should be_false
+      is_empty.should be_false
     end
+
     it "can export to DER format" do
       pkey = OpenSSL::PKey::RSA.new(512)
       pkey.private?.should be_true
@@ -32,18 +34,21 @@ describe OpenSSL::PKey::RSA do
       pkey.to_pem.should eq pem
       pkey.to_der.should eq der
     end
+
     it "can instantiate with a PEM encoded key" do
       pem = OpenSSL::PKey::RSA.new(1024).to_pem
       pkey = OpenSSL::PKey::RSA.new(pem)
 
       pkey.to_pem.should eq pem
     end
+
     it "can instantiate with a DER encoded key" do
       der = OpenSSL::PKey::RSA.new(1024).to_der
       pkey = OpenSSL::PKey::RSA.new(der)
 
       pkey.to_der.should eq der
     end
+
     it "can instantiate with a PEM encoded key and a passphrase" do
       # At present, cannot export with passphrase - for some unknown openssl error means it writes an empty pem
       # The following encrypted_pem has the passphrase 'test'
@@ -95,6 +100,7 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
       decoded.to_pem.should eq not_encrypted_pkey.to_pem
     end
   end
+
   describe "RSA-blinding" do
     it "can turn blinding on" do
       rsa = OpenSSL::PKey::RSA.new(512)
@@ -102,6 +108,7 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
 
       rsa.blinding_on?.should be_true
     end
+
     it "can turn blinding off" do
       rsa = OpenSSL::PKey::RSA.new(512)
       rsa.blinding_on!
@@ -110,6 +117,7 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
       rsa.blinding_on?.should be_false
     end
   end
+
   describe "encrypting / decrypting" do
     it "can encrypt a string using its private key and decrypt with public key" do
       rsa = OpenSSL::PKey::RSA.new(512)
@@ -118,6 +126,7 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
 
       String.new(decrypted).should eq "hello world"
     end
+
     it "can encrypt a string using its public key and decrypt with private key" do
       rsa = OpenSSL::PKey::RSA.new(512)
       encrypted = rsa.public_encrypt "hello world"
@@ -125,6 +134,7 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
 
       String.new(decrypted).should eq "hello world"
     end
+
     it "should be able to sign and verify data" do
       rsa = OpenSSL::PKey::RSA.new(1024)
       digest = OpenSSL::Digest.new("sha256")
@@ -137,11 +147,14 @@ k0LaJjYM2ycehinmuLHgY3qdDJgtEbt4WG5XNQzhyfaN
       rsa.verify(new_digest, signature[0, 10], data).should be_false
     end
   end
+
   describe "can set parameters for more efficient decryption" do
     it "can set dmp1, dmq1, iqmp" do
     end
+
     it "can set p and q" do
     end
+
     it "can set n, e and d for key" do
     end
   end

@@ -17,10 +17,10 @@ describe OpenSSL::PKey::EC do
       pkey.private?.should be_true
 
       pem = pkey.to_pem
-      isEmpty = "-----BEGIN EC PRIVATE KEY-----\n-----END EC PRIVATE KEY-----\n" == pem
+      is_empty = "-----BEGIN EC PRIVATE KEY-----\n-----END EC PRIVATE KEY-----\n" == pem
 
       pem.should contain("BEGIN EC PRIVATE KEY")
-      isEmpty.should be_false
+      is_empty.should be_false
     end
     it "can export to DER format" do
       pkey = OpenSSL::PKey::EC.new(384)

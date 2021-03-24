@@ -38,12 +38,12 @@ module OpenSSL::PKey
 
     case id
     when LibCrypto::EVP_PKEY_RSA
-      return RSA.new io.dup
+      RSA.new io.dup
     when LibCrypto::EVP_PKEY_EC
-      return EC.new io.dup
+      EC.new io.dup
     else
       ret = uninitialized PKey
-      return ret
+      ret
     end
   end
 
@@ -185,7 +185,7 @@ module OpenSSL::PKey
     end
 
     private def passphrase_callback
-      ->(buffer : UInt8*, key_size : Int32, is_read_write : Int32, u : Void*) {
+      ->(buffer : UInt8*, key_size : Int32, _is_read_write : Int32, u : Void*) {
         pwd = Box(String).unbox(u)
 
         if pwd.nil?
@@ -204,7 +204,7 @@ module OpenSSL::PKey
 
         buffer.copy_from(pwd.to_slice.to_unsafe, len)
 
-        return len
+        len
       }
     end
 
@@ -216,7 +216,8 @@ module OpenSSL::PKey
       slice = Slice(UInt8).new(max_encrypt_size)
       digest.update(data)
 
-      digest_pointer = digest.to_unsafe
+      # don't think this is required
+      # digest_pointer = digest.to_unsafe
 
       raise PKeyError.new "Unable to sign" unless LibCrypto.evp_sign_final(digest, slice, out len, self)
 

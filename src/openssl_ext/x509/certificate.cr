@@ -75,12 +75,12 @@ module OpenSSL::X509
 
         case OpenSSL::PKey.get_pkey_id(pkey)
         when LibCrypto::EVP_PKEY_RSA
-          return OpenSSL::PKey::RSA.new io.dup
+          OpenSSL::PKey::RSA.new io.dup
         when LibCrypto::EVP_PKEY_EC
-          return OpenSSL::PKey::EC.new io.dup
+          OpenSSL::PKey::EC.new io.dup
         else
           ret = uninitialized OpenSSL::PKey::PKey
-          return ret
+          ret
         end
       rescue
         raise CertificateError.new "X509_get_pubkey"
@@ -100,17 +100,15 @@ module OpenSSL::X509
     end
 
     def signature_algorithm
-      begin
-        bio = OpenSSL::MemBIO.new
+      bio = OpenSSL::MemBIO.new
 
-        algor = LibCrypto.x509_get0_tbs_sigalg(self)
-        if LibCrypto.i2a_asn1_object(bio, algor.algorithm) != 0
-          raise CertificateError.new
-        end
-        bio.to_string
-      rescue ex : IO::Error
-        raise ex
+      algor = LibCrypto.x509_get0_tbs_sigalg(self)
+      if LibCrypto.i2a_asn1_object(bio, algor.algorithm) != 0
+        raise CertificateError.new
       end
+      bio.to_string
+    rescue ex : IO::Error
+      raise ex
     end
 
     def sign(pkey : OpenSSL::PKey::PKey, digest : Digest)
@@ -124,9 +122,9 @@ module OpenSSL::X509
 
       case LibCrypto.x509_verify(self, pkey)
       when 1
-        return true
+        true
       when 0
-        return false
+        false
       else
         raise CertificateError.new
       end
