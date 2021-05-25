@@ -1,5 +1,7 @@
 # openssl_ext
 
+[![CI](https://github.com/spider-gazelle/openssl_ext/actions/workflows/ci.yml/badge.svg)](https://github.com/spider-gazelle/openssl_ext/actions/workflows/ci.yml)
+
 OpenSSL C Bindings for Crystal (and other extensions)
 
 ## Installation
