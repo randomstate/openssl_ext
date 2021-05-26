@@ -1,7 +1,5 @@
 Style/TypeNames:
-  Excluded:
-    - **/*.cr
+  Enabled: false
 
 Style/ConstantNames:
-  Excluded:
-    - **/*.cr
+  Enabled: false
