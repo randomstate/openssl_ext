@@ -1,0 +1,7 @@
+Style/TypeNames:
+  Excluded:
+    - **/*.cr
+
+Style/ConstantNames:
+  Excluded:
+    - **/*.cr
