@@ -17,8 +17,10 @@ module OpenSSL::PKey
 
       priv = true
 
+      cb, cb_u = OpenSSL::PKey.passphrase_callback(passphrase)
+
       bio = GETS_BIO.new(io)
-      rsa_key = LibCrypto.pem_read_bio_rsa_private_key(bio, nil, nil, passphrase)
+      rsa_key = LibCrypto.pem_read_bio_rsa_private_key(bio, nil, cb, cb_u)
       io.rewind
 
       if rsa_key.null?
@@ -34,14 +36,14 @@ module OpenSSL::PKey
 
       if rsa_key.null?
         bio = GETS_BIO.new(io)
-        rsa_key = LibCrypto.pem_read_bio_rsa_public_key(bio, nil, nil, passphrase)
+        rsa_key = LibCrypto.pem_read_bio_rsa_public_key(bio, nil, cb, cb_u)
         priv = false unless rsa_key.null?
         io.rewind
       end
 
       if rsa_key.null?
         bio = GETS_BIO.new(io)
-        rsa_key = LibCrypto.pem_read_bio_rsa_pubkey(bio, nil, nil, passphrase)
+        rsa_key = LibCrypto.pem_read_bio_rsa_pubkey(bio, nil, cb, cb_u)
         priv = false unless rsa_key.null?
         io.rewind
       end
