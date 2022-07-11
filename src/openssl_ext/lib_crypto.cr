@@ -264,10 +264,21 @@ lib LibCrypto
   fun bio_ctrl = BIO_ctrl(bio : Bio*, cmd : LibC::Int, larg : LibC::Long, parg : Void*) : LibC::Long
 
   fun evp_pkey_new = EVP_PKEY_new : EvpPKey*
-  fun evp_pkey_id = EVP_PKEY_id(pkey : EvpPKey*) : LibC::Int
   fun evp_pkey_free = EVP_PKEY_free(pkey : EvpPKey*)
-  fun evp_pkey_size = EVP_PKEY_size(pkey : EvpPKey*) : LibC::Int
-  fun evp_pkey_bits = EVP_PKEY_bits(pkey : EvpPKey*) : LibC::Int
+  {% if compare_versions(LibCrypto::OPENSSL_VERSION, "3.0.0") >= 0 %}
+    fun evp_pkey_id = EVP_PKEY_get_id(pkey : EvpPKey*) : LibC::Int
+    fun evp_pkey_base_id = EVP_PKEY_get_base_id(pkey : EvpPKey*) : LibC::Int
+    fun evp_pkey_size = EVP_PKEY_get_size(pkey : EvpPKey*) : LibC::Int
+    fun evp_pkey_bits = EVP_PKEY_get_bits(pkey : EvpPKey*) : LibC::Int
+    fun evp_pkey_security_bits = EVP_PKEY_get_security_bits(pkey : EvpPKey*) : LibC::Int
+  {% else %}
+    fun evp_pkey_id = EVP_PKEY_id(pkey : EvpPKey*) : LibC::Int
+    fun evp_pkey_base_id = EVP_PKEY_base_id(pkey : EvpPKey*) : LibC::Int
+    fun evp_pkey_size = EVP_PKEY_size(pkey : EvpPKey*) : LibC::Int
+    fun evp_pkey_bits = EVP_PKEY_bits(pkey : EvpPKey*) : LibC::Int
+    fun evp_pkey_security_bits = EVP_PKEY_security_bits(pkey : EvpPKey*) : LibC::Int
+  {% end %}
+
   fun evp_pkey_get0 = EVP_PKEY_get0(pkey : EvpPKey*) : Void*
   fun evp_pkey_get0_rsa = EVP_PKEY_get0_RSA(pkey : EvpPKey*) : Rsa*
   fun evp_pkey_get0_dsa = EVP_PKEY_get0_DSA(pkey : EvpPKey*) : Dsa*
