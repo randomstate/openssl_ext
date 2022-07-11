@@ -9,12 +9,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
+        experimental: [false]
         os: [ubuntu-latest]
         crystal:
           - latest
-          - nightly
-          - 1.0.0
+        include:
+          - experimental: true
+            os: ubuntu-latest
+            crystal: nightly
     runs-on: ${{ matrix.os }}
+    continue-on-error: ${{ matrix.experimental }}
     container: crystallang/crystal:${{ matrix.crystal }}-alpine
     steps:
     - uses: actions/checkout@v2
