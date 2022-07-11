@@ -9,18 +9,18 @@ class OpenSSL::MemBIO < IO
     initialize LibCrypto.bio_new(LibCrypto.bio_s_mem)
   end
 
-  def read(data : Bytes)
-    LibCrypto.bio_read(self, data, data.size)
+  def read(slice : Bytes)
+    LibCrypto.bio_read(self, slice, slice.size)
   end
 
   {% if compare_versions(Crystal::VERSION, "0.35.0") == 0 %}
-    def write(data : Bytes) : Int64
-      LibCrypto.bio_write(self, data, data.size)
-      data.size.to_i64
+    def write(slice : Bytes) : Int64
+      LibCrypto.bio_write(self, slice, slice.size)
+      slice.size.to_i64
     end
   {% else %}
-    def write(data : Bytes) : Nil
-      LibCrypto.bio_write(self, data, data.size)
+    def write(slice : Bytes) : Nil
+      LibCrypto.bio_write(self, slice, slice.size)
     end
   {% end %}
 
