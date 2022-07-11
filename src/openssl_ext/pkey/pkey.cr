@@ -10,8 +10,10 @@ module OpenSSL::PKey
     io.read_fully(content)
     io.rewind
 
+    cb, cb_u = OpenSSL::PKey.passphrase_callback(passphrase)
+
     bio = GETS_BIO.new(io)
-    pkey = LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase)
+    pkey = LibCrypto.pem_read_bio_private_key(bio, nil, cb, cb_u)
     io.rewind
 
     if pkey.null?
@@ -28,7 +30,7 @@ module OpenSSL::PKey
 
     if pkey.null?
       bio = GETS_BIO.new(io)
-      pkey = LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase)
+      pkey = LibCrypto.pem_read_bio_public_key(bio, nil, cb, cb_u)
       io.rewind
     end
 
@@ -98,17 +100,18 @@ module OpenSSL::PKey
     end
 
     def self.new(io : IO, passphrase = nil, is_private = true)
+      cb, cb_u = OpenSSL::PKey.passphrase_callback(passphrase)
       if is_private
         begin
           bio = GETS_BIO.new(io.dup)
-          new(LibCrypto.pem_read_bio_private_key(bio, nil, nil, passphrase), is_private)
+          new(LibCrypto.pem_read_bio_private_key(bio, nil, cb, cb_u), is_private)
         rescue
           bio = GETS_BIO.new(IO::Memory.new(Base64.decode(io.to_s)))
           new(LibCrypto.d2i_private_key_bio(bio, nil), is_private)
         end
       else
         bio = GETS_BIO.new(io.dup)
-        new(LibCrypto.pem_read_bio_public_key(bio, nil, nil, passphrase), is_private)
+        new(LibCrypto.pem_read_bio_public_key(bio, nil, cb, cb_u), is_private)
       end
     end
 
@@ -139,7 +142,8 @@ module OpenSSL::PKey
           cipher_pointer = pointerof(unsafe)
         end
 
-        raise PKeyError.new "Could not write to PEM" unless LibCrypto.pem_write_bio_pkcs8_private_key(bio, self, cipher_pointer, nil, 0, passphrase_callback, Box.box(passphrase)) == 1
+        cb, cb_u = OpenSSL::PKey.passphrase_callback(passphrase)
+        raise PKeyError.new "Could not write to PEM" unless LibCrypto.pem_write_bio_pkcs8_private_key(bio, self, cipher_pointer, nil, 0, cb, cb_u) == 1
       else
         raise PKeyError.new "Could not write to PEM" unless LibCrypto.pem_write_bio_public_key(bio, self) == 1
       end
@@ -184,30 +188,6 @@ module OpenSSL::PKey
       io.write(output)
     end
 
-    private def passphrase_callback
-      ->(buffer : UInt8*, key_size : Int32, _is_read_write : Int32, u : Void*) {
-        pwd = Box(String).unbox(u)
-
-        if pwd.nil?
-          return 0
-        end
-
-        len = pwd.bytesize
-
-        if len <= 0
-          return 0
-        end
-
-        if len > key_size
-          len = key_size
-        end
-
-        buffer.copy_from(pwd.to_slice.to_unsafe, len)
-
-        len
-      }
-    end
-
     def sign(digest, data)
       unless private?
         raise PKeyError.new "Private key is needed"
@@ -241,5 +221,27 @@ module OpenSSL::PKey
     private def max_encrypt_size
       LibCrypto.evp_pkey_size(self)
     end
+  end
+
+  protected def self.passphrase_callback(passphrase) : {LibCrypto::PasswordCallback, Void*}
+    if passphrase
+      cb = ->(buffer : UInt8*, key_size : Int32, _is_read_write : Int32, u : Void*) {
+        pwd = Box(Bytes).unbox(u)
+
+        if pwd.size > key_size
+          raise PKeyError.new "Passphrase longer than PEM_BUFSIZE (#{key_size})", fetched: true
+        end
+
+        pwd.copy_to(buffer, pwd.size)
+
+        pwd.size
+      }
+      cb_u = Box.box(passphrase.to_slice)
+    else
+      cb = LibCrypto::PasswordCallback.new(Pointer(Void).null, Pointer(Void).null)
+      cb_u = Pointer(Void).null
+    end
+
+    {cb, cb_u}
   end
 end
