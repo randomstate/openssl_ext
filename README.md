@@ -11,8 +11,7 @@ Add this to your application's `shard.yml`:
 ```yaml
 dependencies:
   openssl_ext:
-    github: crystal-extras/openssl_ext
-    branch: master
+    github: spider-gazelle/openssl_ext
 ```
 
 ## Usage
