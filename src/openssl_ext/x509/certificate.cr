@@ -5,8 +5,7 @@ module OpenSSL::X509
 
   class Certificate
     def initialize
-      @cert = LibCrypto.x509_new
-      raise X509Error.new("X509_new") if @cert.null?
+      previous_def
 
       self.version = 2
       self.serial = OpenSSL::BN.rand
@@ -97,18 +96,6 @@ module OpenSSL::X509
 
     def not_after=(time : ASN1::Time)
       LibCrypto.x509_set_notafter(self, time)
-    end
-
-    def signature_algorithm
-      bio = OpenSSL::MemBIO.new
-
-      algor = LibCrypto.x509_get0_tbs_sigalg(self)
-      if LibCrypto.i2a_asn1_object(bio, algor.algorithm) != 0
-        raise CertificateError.new
-      end
-      bio.to_string
-    rescue ex : IO::Error
-      raise ex
     end
 
     def sign(pkey : OpenSSL::PKey::PKey, digest : Digest)
