@@ -40,6 +40,6 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: Install dependencies
-      run: shards install --ignore-crystal-version
+      run: shards install --ignore-crystal-version --skip-postinstall --skip-executables
     - name: Run tests
       run: crystal spec -v --error-trace
