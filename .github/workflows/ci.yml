@@ -30,3 +30,16 @@ jobs:
       run: crystal tool format --check
     - name: Run tests
       run: crystal spec -v --error-trace
+
+  experimental:
+    strategy:
+      fail-fast: false
+    runs-on: ubuntu-latest
+    continue-on-error: true
+    container: placeos/crystal:experimental
+    steps:
+    - uses: actions/checkout@v2
+    - name: Install dependencies
+      run: shards install --ignore-crystal-version
+    - name: Run tests
+      run: crystal spec -v --error-trace
