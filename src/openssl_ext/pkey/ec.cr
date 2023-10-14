@@ -147,6 +147,10 @@ module OpenSSL::PKey
       end
     end
 
+    def group
+      EC::Group.new self
+    end
+
     def group_degree
       LibCrypto.ec_group_get_degree LibCrypto.ec_key_get0_group(ec)
     end
@@ -160,3 +164,5 @@ module OpenSSL::PKey
     end
   end
 end
+
+require "./ec/*"

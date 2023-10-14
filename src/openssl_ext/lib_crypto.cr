@@ -365,6 +365,12 @@ lib LibCrypto
                                                               kstr : UInt8*, klen : Int32, cb : PasswordCallback, user_data : Void*) : Int32
   fun pem_read_bio_ec_pubkey = PEM_read_bio_EC_PUBKEY(bio : Bio*, key : EC_KEY*, cb : PasswordCallback, user_data : Void*) : EC_KEY
   fun pem_write_bio_ec_pubkey = PEM_write_bio_EC_PUBKEY(bio : Bio*, key : EC_KEY) : Int32
+  fun ec_group_free = EC_GROUP_free(group : EC_GROUP)
+  fun ec_point_new = EC_POINT_new(group : EC_GROUP) : EcPoint*
+  fun ec_point_free = EC_POINT_free(point : EcPoint*)
+  fun ec_group_get0_generator = EC_GROUP_get0_generator(group : EC_GROUP) : EcPoint*
+  fun ec_point_dup = EC_POINT_dup(src : EcPoint*, group : EC_GROUP) : EcPoint*
+  fun ec_point_mul = EC_POINT_mul(group : EC_GROUP, r : EcPoint*, n : Bignum*, q : EcPoint*, m : Bignum*, bn_ctx : Void*) : Int32
 
   # Adding x509 Capabilities
   fun x509_name_print_ex = X509_NAME_print_ex(bio : Bio*, name : X509_NAME, indent : Int32, flags : LibC::ULong) : LibC::Int

@@ -12,6 +12,7 @@ describe OpenSSL::PKey::EC do
 
       pkey.public_key.public?.should be_true
     end
+
     it "can export to PEM format" do
       pkey = OpenSSL::PKey::EC.new(384)
       pkey.private?.should be_true
@@ -22,6 +23,7 @@ describe OpenSSL::PKey::EC do
       pem.should contain("BEGIN EC PRIVATE KEY")
       is_empty.should be_false
     end
+
     it "can export to DER format" do
       pkey = OpenSSL::PKey::EC.new(384)
       pkey.private?.should be_true
@@ -32,12 +34,14 @@ describe OpenSSL::PKey::EC do
       pkey.to_pem.should eq pem
       pkey.to_der.should eq der
     end
+
     it "can instantiate with a PEM encoded key" do
       pem = OpenSSL::PKey::EC.new(384).to_pem
       pkey = OpenSSL::PKey::EC.new(pem)
 
       pkey.to_pem.should eq pem
     end
+
     it "can instantiate with a DER encoded key" do
       der = OpenSSL::PKey::EC.new(384).to_der
       pkey = OpenSSL::PKey::EC.new(der)
@@ -45,6 +49,7 @@ describe OpenSSL::PKey::EC do
       pkey.to_der.should eq der
     end
   end
+
   describe "encrypting / decrypting" do
     it "should be able to sign and verify data" do
       ec = OpenSSL::PKey::EC.new(384)
@@ -57,4 +62,6 @@ describe OpenSSL::PKey::EC do
       ec.ec_verify(digest, signature).should be_true
     end
   end
+
+
 end
