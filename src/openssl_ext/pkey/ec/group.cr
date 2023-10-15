@@ -1,4 +1,5 @@
 require "./point"
+require "big"
 
 class OpenSSL::PKey::EC::Group
   def initialize(ec : EC)
@@ -21,11 +22,22 @@ class OpenSSL::PKey::EC::Group
     LibCrypto.ec_group_get_degree self
   end
 
+  def baselen
+    degree // 8
+  end
+
   def generator : Point
     Point.new self, generator: true
   end
 
   def point : Point
     Point.new self
+  end
+
+  def order : BigInt
+    bn = BN.new
+    success = LibCrypto.ec_group_get_order(self, bn, Pointer(Void).null)
+    raise "failed to get order" if success.zero?
+    bn.to_big
   end
 end

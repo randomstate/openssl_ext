@@ -1,3 +1,5 @@
+require "big"
+
 module OpenSSL
   class BNError < Error; end
 
@@ -38,6 +40,10 @@ module OpenSSL
       end
     end
 
+    def self.new(integer : Int)
+      from_dec(integer.to_s)
+    end
+
     def self.from_dec(integer : String)
       new.tap do |bn|
         unsafe = bn.to_unsafe
@@ -70,13 +76,13 @@ module OpenSSL
     end
 
     def size
-      (LibCrypto.bn_num_bits(self) + 7)/8
+      (LibCrypto.bn_num_bits(self) + 7) // 8
     end
 
     def to_bin
       to = Bytes.new size
       LibCrypto.bn_to_bin(self, to)
-      String.new to
+      to
     end
 
     def to_dec
@@ -90,7 +96,11 @@ module OpenSSL
     def to_mpi
       to = Bytes.new size
       LibCrypto.bn_to_mpi(self, to)
-      String.new to
+      to
+    end
+
+    def to_big
+      BigInt.new(to_hex, 16)
     end
 
     def to_unsafe

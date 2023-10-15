@@ -63,6 +63,7 @@ module OpenSSL::PKey
 
     def self.generate(type : String)
       nid = LibCrypto.ec_curve_nist2nid(type)
+      raise "unknown NIST Curve: #{type}" if nid.zero?
       ec_key = LibCrypto.ec_key_new_by_curve_name(nid)
       LibCrypto.ec_key_set_asn1_flag(ec_key, LibCrypto::OPENSSL_EC_NAMED_CURVE)
       if LibCrypto.ec_key_generate_key(ec_key) == 0
